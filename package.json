@@ -4,7 +4,9 @@
   "description": "Starter repository for JS13k, a set of tools for developing a JS game and keeping it under 13kb",
   "main": "Gruntfile.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "grunt": "gulp",
+    "watch": "gulp watch",
+    "build": "gulp build"
   },
   "repository": {
     "type": "git",
@@ -15,21 +17,14 @@
   "bugs": {
     "url": "https://github.com/lucaspenney/js13k-toolkit/issues"
   },
-  "dependencies": {
-    "grunt": "~0.4.5",
-    "grunt-cli": "^1.2.0",
-    "grunt-contrib-compress": "~0.13.0",
-    "grunt-contrib-concat": "~0.5.1",
-    "grunt-contrib-copy": "~0.8.0",
-    "grunt-contrib-htmlmin": "~0.4.0",
-    "grunt-contrib-less": "~1.0.1",
-    "grunt-contrib-uglify": "*",
-    "grunt-contrib-watch": "~0.6.1",
-    "grunt-inline": "^0.3.6",
-    "grunt-text-replace": "~0.4.0",
-    "uglify-es": "^3.0.27"
-  },
   "devDependencies": {
-    "grunt-inline": "^0.3.6"
+    "gulp": "github:gulpjs/gulp#4.0",
+    "gulp-concat": "^2.6.1",
+    "gulp-cssmin": "^0.2.0",
+    "gulp-htmlmin": "^4.0.0",
+    "gulp-uglify-es": "^1.0.4",
+    "gulp-watch": "^5.0.1",
+    "gulp-zip": "^4.2.0",
+    "mkdirp": "^0.5.1"
   }
 }
