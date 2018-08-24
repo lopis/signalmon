@@ -6,7 +6,8 @@
   "scripts": {
     "grunt": "gulp",
     "watch": "gulp watch",
-    "build": "gulp build"
+    "build": "gulp build",
+    "prod": "gulp build; gulp zip"
   },
   "repository": {
     "type": "git",
