@@ -4,7 +4,7 @@
   c.height = window.innerHeight
   const canvas = TC(c)
 
-  const ds = new DrawService()
+  window.ds = new DrawService()
   ds.init(canvas)
-  .then(ds.draw)
+  .then(() => ds.draw(canvas))
 })();
