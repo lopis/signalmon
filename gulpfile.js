@@ -15,8 +15,8 @@ var success = chalk.green;
 var regular = chalk.white;
 
 gulp.task('watch', (done) => {
-	gulp.watch('./src/js/lib/*.js', gulp.series('build-js-lib', 'zip', 'check'));
-	gulp.watch('./src/js/*.js', gulp.series('build-js', 'zip', 'check'));
+	gulp.watch('./src/js/lib/*.js', gulp.series('build-js-lib-dev', 'check'));
+	gulp.watch('./src/js/*.js', gulp.series('build-js-dev', 'check'));
 	gulp.watch('./src/html/**/*.html', gulp.series('build-html', 'check'));
 	gulp.watch('./src/css/**/*.css', gulp.series('build-css', 'check'));
 	gulp.watch('./src/assets/**/*', gulp.series('build-assets', 'check'));
@@ -35,6 +35,17 @@ gulp.task('init', (done) => {
 			});
 		});
 	});
+});
+
+gulp.task('build-js-dev', (done) => {
+	return gulp.src('./src/js/*.js')
+	.pipe(concat('main.js'))
+	.pipe(gulp.dest('./build/'));
+});
+gulp.task('build-js-lib-dev', (done) => {
+	return gulp.src('./src/js/lib/*.js')
+	.pipe(concat('game-lib.js'))
+	.pipe(gulp.dest('./build/'));
 });
 
 gulp.task('build-js', (done) => {
@@ -85,10 +96,20 @@ gulp.task('check', gulp.series('zip', (done) => {
 	done();
 }));
 
-gulp.task('build', gulp.series(
+gulp.task('build-prod', gulp.series(
 	'build-html',
 	'build-js',
 	'build-js-lib',
+	'build-css',
+	'build-assets',
+	'check',
+	'zip',
+	(done) => {done();}
+));
+gulp.task('build-dev', gulp.series(
+	'build-html',
+	'build-js-dev',
+	'build-js-lib-dev',
 	'build-css',
 	'build-assets',
 	'check',
