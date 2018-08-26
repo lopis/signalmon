@@ -1,6 +1,24 @@
 html, body {
   margin: 0;
+  overflow: hidden;
+}
+
+html {
+  background: #4b4b4b;
   height: 100%;
   width: 100%;
-  overflow: hidden;
+}
+
+body {
+  background: white;
+  max-width: 375px;
+  max-height: 667px;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: auto;
+  border: 1vw solid #2b2b2b;
+  box-shadow: 0 0 0 1vw #933535;
 }

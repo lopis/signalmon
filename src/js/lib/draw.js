@@ -45,18 +45,32 @@ function DrawService () {
         hungerBar: {
           offsetX: canvas.c.width * 0.20,
           offsetY: - canvas.c.width * 0.30,
-          u0: 0.5, v0: 0.5, u1: 1, v1: 0.625
+          u0: 0.8, v0: 0.8, u1: 0.9, v1: 0.9
         },
         sleepBar: {
           offsetX: canvas.c.width * 0.20,
           offsetY: - canvas.c.width * 0.20,
-          u0: 0.5, v0: 0.625, u1: 1, v1: 0.75
+          u0: 0.8, v0: 0.9, u1: 0.9, v1: 1.0
         },
         moodBar: {
           offsetX: canvas.c.width * 0.20,
           offsetY: - canvas.c.width * 0.10,
-          u0: 0.5, v0: 0.75, u1: 1, v1: 0.875
+          u0: 0.9, v0: 0.8, u1: 1, v1: 0.9
         },
+      }
+    }
+    this.wifly = {
+      sprite: "wiflies.png",
+      width: canvas.c.width * 0.1,
+      height: canvas.c.width * 0.1,
+      tiles: {
+        0: {u0: 0.0, v0: 0.0, u1: 0.5, v1: 0.5},
+        1: {u0: 0.5, v0: 0.0, u1: 1.0, v1: 0.5},
+        2: {u0: 0.0, v0: 0.5, u1: 0.5, v1: 1.0},
+        3: {u0: 0.5, v0: 0.5, u1: 1.0, v1: 1.0},
+      },
+      states: {
+        idle: [0, 1, 2, 3]
       }
     }
 
@@ -73,6 +87,7 @@ function DrawService () {
     return Promise.all([
       loadSprite(this.char, canvas),
       loadSprite(this.icons, canvas),
+      loadSprite(this.wifly, canvas),
     ])
   }
 
@@ -139,6 +154,20 @@ function DrawService () {
       ...this.icons,
       width: canvas.c.width * 0.7 * moodState.mood
     }, "moodBar")
+    canvas.pop()
+    canvas.flush()
+  }
+
+  this.drawWiflies = (canvas, wiflies) => {
+    canvas.push()
+    canvas.trans(0, 0)
+    wiflies.forEach(({x, y}) => {
+      renderObject(canvas, {
+        ...this.wifly,
+        posX: x * canvas.c.width,
+        posY: y * canvas.c.height * 0.4
+      }, 0)
+    })
     canvas.pop()
     canvas.flush()
   }

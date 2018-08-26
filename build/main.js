@@ -1,26 +1,25 @@
 (function() {
   const c = document.getElementById('app')
-  c.width = window.innerWidth
-  c.height = window.innerHeight
+  c.width = document.body.clientWidth
+  c.height = document.body.clientHeight
   const canvas = TC(c)
 
-  window.ds = new DrawService()
-
-  const moodState = {
-    hunger: 0.5,
-    sleep: 0.8,
-    mood: 0.75
-  }
+  const ds = new DrawService()
+  const game = new Game()
 
   const mainLoop = () => {
     try {
       ds.draw(canvas)
-      ds.drawMoodBars(canvas, moodState)
-      requestAnimationFrame(mainLoop);
+      ds.drawMoodBars(canvas, game.state.mood)
+      ds.drawWiflies(canvas, game.state.wiflies)
+      setTimeout(() => {
+        requestAnimationFrame(mainLoop)
+      }, 500)
     } catch (e) {
       console.error(e)
     }
   }
 
+  game.init()
   ds.init(canvas).then(mainLoop)
 })();
