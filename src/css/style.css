@@ -10,7 +10,11 @@ html {
 }
 
 body {
-  background: white;
+  background: white url("background.png");
+  background-size: cover;
+  background-position: center bottom;
+  image-rendering: optimizespeed;
+  image-rendering: pixelated;
   max-width: 375px;
   max-height: 667px;
   position: absolute;
