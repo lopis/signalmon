@@ -14,7 +14,7 @@
       ds.drawWiflies(canvas, game.state.wiflies)
       setTimeout(() => {
         requestAnimationFrame(mainLoop)
-      }, 500)
+      }, 32)
     } catch (e) {
       console.error(e)
     }

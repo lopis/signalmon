@@ -1,5 +1,6 @@
 /* Handles drawing each element on the game */
 function DrawService () {
+  let tick = 0
   this.init = (canvas) => {
     this.char = {
       sprite: "char_red.png",
@@ -70,7 +71,7 @@ function DrawService () {
         3: {u0: 0.5, v0: 0.5, u1: 1.0, v1: 1.0},
       },
       states: {
-        idle: [0, 1, 2, 3]
+        flying: [0, 1, 2, 3]
       }
     }
 
@@ -83,6 +84,10 @@ function DrawService () {
         this.char.nextFrame = 0
       }
     }, 500)
+
+    setInterval(() => {
+      tick++
+    }, 50)
 
     return Promise.all([
       loadSprite(this.char, canvas),
@@ -161,12 +166,12 @@ function DrawService () {
   this.drawWiflies = (canvas, wiflies) => {
     canvas.push()
     canvas.trans(0, 0)
-    wiflies.forEach(({x, y}) => {
+    wiflies.forEach(({x, y}, i) => {
       renderObject(canvas, {
         ...this.wifly,
         posX: x * canvas.c.width,
         posY: y * canvas.c.height * 0.4
-      }, 0)
+      }, (i + tick)%(this.wifly.states.flying.length))
     })
     canvas.pop()
     canvas.flush()
