@@ -12,9 +12,15 @@
     mood: 0.75
   }
 
-  ds.init(canvas)
-  .then(() => {
-    ds.draw(canvas)
-    ds.drawMoodBars(canvas, moodState)
-  })
+  const mainLoop = () => {
+    try {
+      ds.draw(canvas)
+      ds.drawMoodBars(canvas, moodState)
+      requestAnimationFrame(mainLoop);
+    } catch (e) {
+      console.error(e)
+    }
+  }
+
+  ds.init(canvas).then(mainLoop)
 })();

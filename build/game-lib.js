@@ -1,14 +1,23 @@
 /* Handles drawing each element on the game */
 function DrawService () {
   this.init = (canvas) => {
-    this.character = {
+    this.char = {
       sprite: "char_red.png",
       width: canvas.c.width * 0.5,
       height: canvas.c.width * 0.5,
       posX: canvas.c.width * 0.25,
       posY: canvas.c.height * 0.5 - canvas.c.width * 0.25,
       tiles: {
-        idle: {u0: 0.5, v0: 0.5, u1: 1, v1: 1}
+        idle0: {u0: 0.0, v0: 0.0, u1: 0.5, v1: 0.5},
+        idle1: {u0: 0.5, v0: 0.0, u1: 1.0, v1: 0.5},
+        idle2: {u0: 0.0, v0: 0.5, u1: 0.5, v1: 1.0},
+        idle3: {u0: 0.5, v0: 0.5, u1: 1.0, v1: 1.0},
+      },
+      states: {
+        idle: [
+          'idle0', 'idle1', 'idle0', 'idle1',
+          'idle2', 'idle3', 'idle2', 'idle3'
+        ]
       }
     }
     this.icons = {
@@ -51,8 +60,18 @@ function DrawService () {
       }
     }
 
+    this.char.state = 'idle'
+    this.char.nextFrame = 0
+    setInterval(() => {
+      const {nextFrame, tiles, state, states} = this.char
+      this.char.nextFrame = nextFrame + 1
+      if (!tiles[states[state][nextFrame + 1]]) {
+        this.char.nextFrame = 0
+      }
+    }, 500)
+
     return Promise.all([
-      loadSprite(this.character, canvas),
+      loadSprite(this.char, canvas),
       loadSprite(this.icons, canvas),
     ])
   }
@@ -79,7 +98,10 @@ function DrawService () {
     canvas.cls()
     canvas.push()
     canvas.trans(0, 0)
-    renderObject(canvas, this.character, "idle")
+
+    const {tiles, state, states, nextFrame} = this.char
+    renderObject(canvas, this.char, states[state][nextFrame])
+
     renderObject(canvas, this.icons, "hunger")
     renderObject(canvas, this.icons, "sleep")
     renderObject(canvas, this.icons, "mood")
@@ -88,6 +110,10 @@ function DrawService () {
   }
 
   const renderObject = (canvas, obj, frame) => {
+    if (!obj.tiles[frame]) {
+      console.error(`Frame ${frame} doesn't exit`);
+      throw `Frame ${frame} doesn't exit`
+    }
     const {u0, v0, u1, v1, offsetX = 0, offsetY = 0} = obj.tiles[frame]
     canvas.img(
         obj.texture,

@@ -5,7 +5,7 @@
   "main": "Gruntfile.js",
   "scripts": {
     "grunt": "gulp",
-    "watch": "gulp watch",
+    "watch": "gulp build-dev; gulp watch",
     "build": "gulp build-dev",
     "prod": "gulp build-prod"
   },
