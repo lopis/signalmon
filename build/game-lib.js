@@ -196,35 +196,38 @@ function Game () {
     sad: false,
   }
 
-  const updateWiflies = () => {
+  const breedWiflies = () => {
     const {wiflies, deadWiflies} = this.state
 
-    if (Math.random() > 0.95) {
-      if (navigator.onLine) {
-        wiflies.push({
-          x: Math.random(),
-          y: Math.random() * 0.2
-        })
-      } else if (wiflies.length > 0) {
-        const dead = wiflies.pop()
-        dead.isDead = true
-        deadWiflies.push(dead)
-      }
+    if (navigator.onLine) {
+      wiflies.push({
+        x: Math.random(),
+        y: Math.random() * 0.2
+      })
+    } else if (wiflies.length > 0) {
+      const dead = wiflies.pop()
+      dead.isDead = true
+      dead.pos = 1.5 - ((dead.x - 0.5)**2)*2*Math.random()
+      deadWiflies.push(dead)
     }
+    setTimeout(breedWiflies, 9000 * Math.random() + 1000)
+  }
 
+  const updateWiflies = () => {
+    const {wiflies, deadWiflies} = this.state
     this.state.wiflies = wiflies.map(updatePosition)
     this.state.deadWiflies = deadWiflies.map(updatePosition)
   }
 
   const WIFLY_VELOCITY = 0.02
   const updatePosition = (props) => {
-    const {x, y, d=0, isDead} = props
+    const {x, y, d=0, isDead, pos} = props
 
     if (isDead) {
       newDirection = Math.PI / 2
       return {
         ...props,
-        y: y < 1.5 ? y + 2*WIFLY_VELOCITY : y
+        y: y < pos ? y + 2*WIFLY_VELOCITY : y
       }
     } else  {
       let newDirection = (d + Math.random()) % (2 * Math.PI)
@@ -268,19 +271,36 @@ function Game () {
   }
 
   this.init = () => {
+    breedWiflies()
     setInterval(updateWiflies, 100)
     setInterval(updateMood, 1000)
     this.state.wiflies.push({
-      x: 0.5,
-      y: Math.random() * 0.3
+      x: 0.2,
+      y: 0.3
+    })
+    this.state.wiflies.push({
+      x: 0.3,
+      y: 0.3
+    })
+    this.state.wiflies.push({
+      x: 0.4,
+      y: 0.3
     })
     this.state.wiflies.push({
       x: 0.5,
-      y: Math.random() * 0.3
+      y: 0.3
     })
     this.state.wiflies.push({
-      x: 0.5,
-      y: Math.random() * 0.3
+      x: 0.6,
+      y: 0.3
+    })
+    this.state.wiflies.push({
+      x: 0.7,
+      y: 0.3
+    })
+    this.state.wiflies.push({
+      x: 0.8,
+      y: 0.3
     })
     updateWiflies()
   }
