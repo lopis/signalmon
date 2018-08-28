@@ -65,13 +65,16 @@ function DrawService () {
       width: canvas.c.width * 0.1,
       height: canvas.c.width * 0.1,
       tiles: {
-        0: {u0: 0.0, v0: 0.0, u1: 0.5, v1: 0.5},
-        1: {u0: 0.5, v0: 0.0, u1: 1.0, v1: 0.5},
-        2: {u0: 0.0, v0: 0.5, u1: 0.5, v1: 1.0},
-        3: {u0: 0.5, v0: 0.5, u1: 1.0, v1: 1.0},
+        0: {u0: 0.0, v0: 0.0, u1: 0.5, v1: 1/3},
+        1: {u0: 0.5, v0: 0.0, u1: 1.0, v1: 1/3},
+        2: {u0: 0.0, v0: 1/3, u1: 0.5, v1: 2/3},
+        3: {u0: 0.5, v0: 1/3, u1: 1.0, v1: 2/3},
+        dead0: {u0: 0.0, v0: 2/3, u1: 0.5, v1: 1.0},
+        dead1: {u0: 0.5, v0: 2/3, u1: 1.0, v1: 1.0},
       },
       states: {
-        flying: [0, 1, 2, 3]
+        flying: [0, 1, 2, 3],
+        dead: ["dead0", "dead1"]
       }
     }
 
@@ -163,15 +166,16 @@ function DrawService () {
     canvas.flush()
   }
 
-  this.drawWiflies = (canvas, wiflies) => {
+  this.drawWiflies = (canvas, wiflies, areDead) => {
     canvas.push()
     canvas.trans(0, 0)
     wiflies.forEach(({x, y}, i) => {
+      const frame = areDead ? `dead${tick%2}` : (i + tick)%4
       renderObject(canvas, {
         ...this.wifly,
         posX: x * canvas.c.width,
         posY: y * canvas.c.height * 0.4
-      }, (i + tick)%(this.wifly.states.flying.length))
+      }, frame)
     })
     canvas.pop()
     canvas.flush()
@@ -185,38 +189,95 @@ function Game () {
       sleep: 1.0,
       mood: 1.0
     },
-    wiflies: []
+    wiflies: [],
+    deadWiflies: [],
+    sleeping: false,
+    hungry: false,
+    sad: false,
   }
 
   const updateWiflies = () => {
-    if (navigator.onLine && Math.random() > 0.99) {
-      this.state.wiflies.push({
-        x: Math.random(),
-        y: Math.random() * 0.2
-      })
+    const {wiflies, deadWiflies} = this.state
+
+    if (Math.random() > 0.95) {
+      if (navigator.onLine) {
+        wiflies.push({
+          x: Math.random(),
+          y: Math.random() * 0.2
+        })
+      } else if (wiflies.length > 0) {
+        const dead = wiflies.pop()
+        dead.isDead = true
+        deadWiflies.push(dead)
+      }
     }
 
-    this.state.wiflies = this.state.wiflies.map(updatePosition)
+    this.state.wiflies = wiflies.map(updatePosition)
+    this.state.deadWiflies = deadWiflies.map(updatePosition)
   }
 
   const WIFLY_VELOCITY = 0.02
-  const updatePosition = ({x, y, d=0}) => {
-    let newDirection = (d + Math.random()) % (2 * Math.PI)
+  const updatePosition = (props) => {
+    const {x, y, d=0, isDead} = props
 
-    const newv = {
-      x: WIFLY_VELOCITY * Math.cos(newDirection),
-      y: WIFLY_VELOCITY * Math.sin(newDirection)
+    if (isDead) {
+      newDirection = Math.PI / 2
+      return {
+        ...props,
+        y: y < 1.5 ? y + 2*WIFLY_VELOCITY : y
+      }
+    } else  {
+      let newDirection = (d + Math.random()) % (2 * Math.PI)
+      const newv = {
+        x: WIFLY_VELOCITY * Math.cos(newDirection),
+        y: WIFLY_VELOCITY * Math.sin(newDirection)
+      }
+      return {
+        ...props,
+        x: (x + newv.x < 0.1 || x + newv.x > 0.9) ? x - newv.x: x + newv.x,
+        y: (y + newv.y < 0.1 || y + newv.y > 0.9) ? y - newv.y: y + newv.y,
+        d: newDirection
+      }
     }
+  }
 
-    return {
-      x: (x + newv.x < 0.1 || x + newv.x > 0.9) ? x - newv.x: x + newv.x,
-      y: (y + newv.y < 0.1 || y + newv.y > 0.9) ? y - newv.y: y + newv.y,
-      d: newDirection
+  const WIFLY_THERESHOLD = 2
+  const MINIMUM_BAR_SIZE = 0.01
+  const MOOD_SPEED = 0.002
+  const SLEEP_SPEED = 0.001
+  const updateMood = () => {
+    const {wiflies, mood, sad} = this.state
+    const newState = this.state
+    if (sad) {
+      newState.sleep = false
+      newState.mood.mood = Math.max(
+        MINIMUM_BAR_SIZE,
+        mood.mood - wiflies.length * 0.002
+      )
     }
+    if (wiflies.length > WIFLY_THERESHOLD
+      || mood.sleep < 0.1
+      || mood.mood < 0.1
+      || mood.hunger < 0.1) {
+        newState.sad = true
+    }
+    newState.mood.sleep = Math.max(
+      MINIMUM_BAR_SIZE,
+      mood.sleep - SLEEP_SPEED
+    )
   }
 
   this.init = () => {
     setInterval(updateWiflies, 100)
+    setInterval(updateMood, 1000)
+    this.state.wiflies.push({
+      x: 0.5,
+      y: Math.random() * 0.3
+    })
+    this.state.wiflies.push({
+      x: 0.5,
+      y: Math.random() * 0.3
+    })
     this.state.wiflies.push({
       x: 0.5,
       y: Math.random() * 0.3

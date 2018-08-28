@@ -65,13 +65,16 @@ function DrawService () {
       width: canvas.c.width * 0.1,
       height: canvas.c.width * 0.1,
       tiles: {
-        0: {u0: 0.0, v0: 0.0, u1: 0.5, v1: 0.5},
-        1: {u0: 0.5, v0: 0.0, u1: 1.0, v1: 0.5},
-        2: {u0: 0.0, v0: 0.5, u1: 0.5, v1: 1.0},
-        3: {u0: 0.5, v0: 0.5, u1: 1.0, v1: 1.0},
+        0: {u0: 0.0, v0: 0.0, u1: 0.5, v1: 1/3},
+        1: {u0: 0.5, v0: 0.0, u1: 1.0, v1: 1/3},
+        2: {u0: 0.0, v0: 1/3, u1: 0.5, v1: 2/3},
+        3: {u0: 0.5, v0: 1/3, u1: 1.0, v1: 2/3},
+        dead0: {u0: 0.0, v0: 2/3, u1: 0.5, v1: 1.0},
+        dead1: {u0: 0.5, v0: 2/3, u1: 1.0, v1: 1.0},
       },
       states: {
-        flying: [0, 1, 2, 3]
+        flying: [0, 1, 2, 3],
+        dead: ["dead0", "dead1"]
       }
     }
 
@@ -163,15 +166,16 @@ function DrawService () {
     canvas.flush()
   }
 
-  this.drawWiflies = (canvas, wiflies) => {
+  this.drawWiflies = (canvas, wiflies, areDead) => {
     canvas.push()
     canvas.trans(0, 0)
     wiflies.forEach(({x, y}, i) => {
+      const frame = areDead ? `dead${tick%2}` : (i + tick)%4
       renderObject(canvas, {
         ...this.wifly,
         posX: x * canvas.c.width,
         posY: y * canvas.c.height * 0.4
-      }, (i + tick)%(this.wifly.states.flying.length))
+      }, frame)
     })
     canvas.pop()
     canvas.flush()

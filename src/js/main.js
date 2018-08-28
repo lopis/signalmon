@@ -12,6 +12,7 @@
       ds.draw(canvas)
       ds.drawMoodBars(canvas, game.state.mood)
       ds.drawWiflies(canvas, game.state.wiflies)
+      ds.drawWiflies(canvas, game.state.deadWiflies, true)
       setTimeout(() => {
         requestAnimationFrame(mainLoop)
       }, 32)
