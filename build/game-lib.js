@@ -1,3 +1,43 @@
+(function () {
+  window.__ = (q) => document.querySelector(q)
+  window.on = (el, ev, c) => el.addEventListener(ev,c)
+  window.off = (el, ev) => el.removeEventListener(ev)
+  window.click = (el,c) => on(el, 'click',c)
+
+  const track = el => ev => {
+    if (!el) {
+      document.body.onmousemove = null
+    } else {
+      const x = el.offsetParent.offsetLeft
+      const y = el.offsetParent.offsetTop
+      document.body.onmousemove = ({clientX, clientY}) => {
+        console.log('ev', clientY, y);
+        el.style.top = `${clientY - y}px`
+        el.style.left = `${clientX - x}px`
+      }
+      on(document.body, 'mouseup', track(null))
+      on(document.body, 'mouseleave', track(null))
+    }
+  }
+
+  click(__('#ball'), e => {
+    console.log('#ball')
+  })
+  click(__('#duck'), e => {
+    __('#duck').setAttribute('disabled', true)
+    const duck = document.createElement('div')
+    duck.className = 'duck-toy'
+    on(duck, 'mousedown', track(duck))
+    __('#app').appendChild(duck)
+  })
+  click(__('#bed'), e => {
+    console.log('#bed')
+  })
+  click(__('#feed'), e => {
+    console.log('#feed')
+  })
+})()
+
 /* Handles drawing each element on the game */
 function DrawService (e) {
   let tick = 0
@@ -46,32 +86,32 @@ function DrawService (e) {
       tiles: {
         hunger: {
           offsetX: canvas.c.width * 0.10,
-          offsetY: - canvas.c.width * 0.30,
+          offsetY: - canvas.c.width * 0.45,
           u0: 0, v0: 0, u1: 0.5, v1: 0.5
         },
         sleep: {
           offsetX: canvas.c.width * 0.10,
-          offsetY: - canvas.c.width * 0.20,
+          offsetY: - canvas.c.width * 0.35,
           u0: 0.5, v0: 0, u1: 1, v1: 0.5
         },
         mood: {
           offsetX: canvas.c.width * 0.10,
-          offsetY: - canvas.c.width * 0.10,
+          offsetY: - canvas.c.width * 0.25,
           u0: 0, v0: 0.5, u1: 0.5, v1: 1
         },
         hungerBar: {
           offsetX: canvas.c.width * 0.20,
-          offsetY: - canvas.c.width * 0.30,
+          offsetY: - canvas.c.width * 0.45,
           u0: 0.8, v0: 0.8, u1: 0.9, v1: 0.9
         },
         sleepBar: {
           offsetX: canvas.c.width * 0.20,
-          offsetY: - canvas.c.width * 0.20,
+          offsetY: - canvas.c.width * 0.35,
           u0: 0.8, v0: 0.9, u1: 0.9, v1: 1.0
         },
         moodBar: {
           offsetX: canvas.c.width * 0.20,
-          offsetY: - canvas.c.width * 0.10,
+          offsetY: - canvas.c.width * 0.25,
           u0: 0.9, v0: 0.8, u1: 1, v1: 0.9
         },
       }
@@ -108,7 +148,7 @@ function DrawService (e) {
       }
     }
 
-    this.char.state = 'eat'
+    this.char.state = 'idle'
     this.char.nextFrame = 0
     setInterval(() => {
       const {nextFrame, tiles, state, states} = this.char
@@ -146,22 +186,22 @@ function DrawService (e) {
     })
   }
 
-  this.draw = canvas => {
-    if (!canvas) return
+  this.draw = (c, s) => {
+    if (!c) return
 
-    canvas.cls()
-    canvas.push()
-    canvas.trans(0, 0)
+    c.cls()
+    c.push()
+    c.trans(0, 0)
 
     const {tiles, state, states, nextFrame} = this.char
-    this.drawBed(canvas, 1)
-    renderObject(canvas, this.char, states[state][nextFrame])
+    this.drawBed(c, 1)
+    renderObject(c, this.char, states[state][nextFrame])
 
-    renderObject(canvas, this.icons, "hunger")
-    renderObject(canvas, this.icons, "sleep")
-    renderObject(canvas, this.icons, "mood")
-    canvas.pop()
-    canvas.flush()
+    renderObject(c, this.icons, "hunger")
+    renderObject(c, this.icons, "sleep")
+    renderObject(c, this.icons, "mood")
+    c.pop()
+    c.flush()
   }
 
   const renderObject = (canvas, obj, frame) => {
@@ -252,7 +292,7 @@ function Game (e) {
       dead.pos = 1.6 - ((dead.x - 0.5)**2)*3*Math.random()
       deadWiflies.push(dead)
     }
-    setTimeout(breedWiflies, 9000 * Math.random() + 1000)
+    setTimeout(breedWiflies, 20000 * Math.random() + 5000)
   }
 
   const updateWiflies = () => {
@@ -322,34 +362,6 @@ function Game (e) {
     breedWiflies()
     setInterval(updateWiflies, 100)
     setInterval(updateMood, 1000)
-    this.state.wiflies.push({
-      x: 0.2,
-      y: 0.3
-    })
-    this.state.wiflies.push({
-      x: 0.3,
-      y: 0.3
-    })
-    this.state.wiflies.push({
-      x: 0.4,
-      y: 0.3
-    })
-    this.state.wiflies.push({
-      x: 0.5,
-      y: 0.3
-    })
-    this.state.wiflies.push({
-      x: 0.6,
-      y: 0.3
-    })
-    this.state.wiflies.push({
-      x: 0.7,
-      y: 0.3
-    })
-    this.state.wiflies.push({
-      x: 0.8,
-      y: 0.3
-    })
     updateWiflies()
   }
 }

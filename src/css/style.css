@@ -1,15 +1,12 @@
 html, body {
   margin: 0;
   overflow: hidden;
-}
-
-html {
   background: #4b4b4b;
   height: 100%;
   width: 100%;
 }
 
-body {
+#app {
   background: white url("background.png");
   background-size: cover;
   background-position: center bottom;
@@ -24,4 +21,63 @@ body {
   right: 0;
   margin: auto;
   box-shadow: 0vw 1vw 2vw 1vw #2b2b2b;
+}
+
+#actionPad {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  display: flex;
+}
+.item {
+  background-color: white;
+  border: none;
+  padding: 10px 0;
+  font-size: 16px;
+  font-family: monospace;
+  flex: 1;
+  text-align: center;
+}
+.item::before {
+  content: "";
+  height: 24px;
+  width: 24px;
+  margin: auto;
+  display: block;
+  background: url('items.png') no-repeat;
+  background-size: 96px;
+  vertical-align: middle;
+}
+#ball::before {
+  background-position: 0 0;
+}
+#duck::before {
+  background-position: 0 -24px;
+}
+#bed::before {
+  background-position: 0 -48px;
+}
+#feed::before {
+  background-position: 0 -72px;
+}
+#food::before {
+  background-position: -24px -72px;
+}
+#money::before {
+  background-position: -48px -72px;
+}
+
+.duck-toy, .ball-toy {
+  background: url('items.png') no-repeat;
+  background-size: 400%;
+  background-position: 0 33%;
+  height: 32px;
+  width: 32px;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+[disabled] {
+    opacity: 0.5;
 }

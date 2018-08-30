@@ -24,7 +24,7 @@ function Game (e) {
       dead.pos = 1.6 - ((dead.x - 0.5)**2)*3*Math.random()
       deadWiflies.push(dead)
     }
-    setTimeout(breedWiflies, 9000 * Math.random() + 1000)
+    setTimeout(breedWiflies, 20000 * Math.random() + 5000)
   }
 
   const updateWiflies = () => {
@@ -94,34 +94,6 @@ function Game (e) {
     breedWiflies()
     setInterval(updateWiflies, 100)
     setInterval(updateMood, 1000)
-    this.state.wiflies.push({
-      x: 0.2,
-      y: 0.3
-    })
-    this.state.wiflies.push({
-      x: 0.3,
-      y: 0.3
-    })
-    this.state.wiflies.push({
-      x: 0.4,
-      y: 0.3
-    })
-    this.state.wiflies.push({
-      x: 0.5,
-      y: 0.3
-    })
-    this.state.wiflies.push({
-      x: 0.6,
-      y: 0.3
-    })
-    this.state.wiflies.push({
-      x: 0.7,
-      y: 0.3
-    })
-    this.state.wiflies.push({
-      x: 0.8,
-      y: 0.3
-    })
     updateWiflies()
   }
 }

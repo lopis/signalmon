@@ -1,7 +1,7 @@
 (function() {
-  const c = document.getElementById('app')
-  c.width = document.body.clientWidth
-  c.height = document.body.clientHeight
+  const c = document.getElementById('canvas')
+  c.width = __('#app').clientWidth
+  c.height = __('#app').clientHeight
   const canvas = TC(c)
 
   const e = new Events()
@@ -10,7 +10,7 @@
 
   const mainLoop = () => {
     try {
-      ds.draw(canvas)
+      ds.draw(canvas, game.state)
       ds.drawMoodBars(canvas, game.state)
       ds.drawWiflies(canvas, game.state.wiflies)
       ds.drawWiflies(canvas, game.state.deadWiflies, true)
