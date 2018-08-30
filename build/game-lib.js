@@ -77,6 +77,20 @@ function DrawService () {
         dead: ["dead0", "dead1"]
       }
     }
+    this.items = {
+      sprite: "items.png",
+      width: canvas.c.width * 0.125,
+      height: canvas.c.width * 0.125,
+      posX: canvas.c.width * 0.25,
+      posY: canvas.c.height * 0.5 - canvas.c.width * 0.25,
+      tiles: {
+        ball: {u0: 0.0, v0: 0.0, u1: 1/4, v1: 1/4},
+        duck: {u0: 0.0, v0: 1/4, u1: 1/4, v1: 2/4},
+        bed1: {u0: 1/4, v0: 0.0, u1: 4/4, v1: 1/4},
+        bed2: {u0: 1/4, v0: 1/4, u1: 4/4, v1: 2/4},
+        bed3: {u0: 1/4, v0: 2/4, u1: 4/4, v1: 3/4},
+      }
+    }
 
     this.char.state = 'idle'
     this.char.nextFrame = 0
@@ -94,6 +108,7 @@ function DrawService () {
 
     return Promise.all([
       loadSprite(this.char, canvas),
+      loadSprite(this.items, canvas),
       loadSprite(this.icons, canvas),
       loadSprite(this.wifly, canvas),
     ])
@@ -123,6 +138,7 @@ function DrawService () {
     canvas.trans(0, 0)
 
     const {tiles, state, states, nextFrame} = this.char
+    this.drawBed(canvas, 1)
     renderObject(canvas, this.char, states[state][nextFrame])
 
     renderObject(canvas, this.icons, "hunger")
@@ -179,6 +195,18 @@ function DrawService () {
     })
     canvas.pop()
     canvas.flush()
+  }
+
+  this.drawBed = (canvas, bedLevel = 0) => {
+    if (bedLevel > 0) {
+      renderObject(canvas, {
+        ...this.items,
+        width: canvas.c.width * 0.75,
+        height: canvas.c.width * 0.25,
+        posX: canvas.c.width * 0.125,
+        posY: canvas.c.height * 0.5 - canvas.c.width * 0.0625,
+      }, `bed${bedLevel}`)
+    }
   }
 }
 
