@@ -1,9 +1,4 @@
-(function () {
-  window.__ = (q) => document.querySelector(q)
-  window.on = (el, ev, c) => el.addEventListener(ev,c)
-  window.off = (el, ev) => el.removeEventListener(ev)
-  window.click = (el,c) => on(el, 'click',c)
-
+function Controls ({emit}) {
   const track = el => ev => {
     if (!el) {
       document.body.onmousemove = null
@@ -31,9 +26,9 @@
     __('#app').appendChild(duck)
   })
   click(__('#bed'), e => {
-    console.log('#bed')
+    emit('upgrade')
   })
   click(__('#feed'), e => {
     console.log('#feed')
   })
-})()
+}

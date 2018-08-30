@@ -8,6 +8,7 @@ function Game (e) {
     asleep: false,
     hungry: false,
     sad: false,
+    bedLevel: 0,
   }
 
   const breedWiflies = () => {
@@ -58,13 +59,13 @@ function Game (e) {
     }
   }
 
-  const WIFLY_THERESHOLD = 3
+  const WIFLY_THERESHOLD = 4
   const MINIMUM_BAR_SIZE = 0.01
-  const MOOD_SPEED = 0.002
-  const SLEEP_SPEED = 0.001
+  const MOOD_SPEED = 0.005
+  const SLEEP_SPEED = 0.005
   const updateMood = () => {
-    const {wiflies, mood, hunger, sleep, sad} = this.state
-    if (sleep < 0.25) {
+    const {wiflies, mood, hunger, sleep, sad, asleep} = this.state
+    if (sleep < 0.3) {
       this.setState('asleep', true)
     }
     if (wiflies.length > WIFLY_THERESHOLD) {
@@ -74,7 +75,11 @@ function Game (e) {
     if (sleep < 0.2 || mood < 0.2 || hunger < 0.2) {
         this.setState('sad', true)
     }
-    this.incState('sleep', this.state.asleep ? SLEEP_SPEED : -SLEEP_SPEED)
+    this.incState('sleep', asleep ? SLEEP_SPEED : -SLEEP_SPEED)
+    if (asleep && sleep === 1) {
+      this.setState('asleep', false)
+      this.setState('sad', false)
+    }
   }
 
   this.setState = (key, value) => {
@@ -85,9 +90,9 @@ function Game (e) {
   }
   this.incState = (key, inc) => {
     const value = this.state[key] + inc
-    if (value >= MINIMUM_BAR_SIZE && value <= 1) {
-      this.state[key] = value
-    }
+    this.state[key] = value <= MINIMUM_BAR_SIZE ? MINIMUM_BAR_SIZE
+      : value >= 1 ? 1
+      : value
   }
 
   this.init = () => {
@@ -95,5 +100,11 @@ function Game (e) {
     setInterval(updateWiflies, 100)
     setInterval(updateMood, 1000)
     updateWiflies()
+
+    e.on('upgrade', () => {
+      if (this.state.bedLevel < 3) {
+        this.state.bedLevel++
+      }
+    })
   }
 }

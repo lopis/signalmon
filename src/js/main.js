@@ -7,6 +7,7 @@
   const e = new Events()
   const ds = new DrawService(e)
   const game = new Game(e)
+  const controls = new Controls(e)
 
   const mainLoop = () => {
     try {

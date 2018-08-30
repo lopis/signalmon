@@ -4,7 +4,9 @@ function DrawService (e) {
 
   e.on('char:update', char => {
     console.log('char:update');
-    this.char.state = char.sad ? 'sad' : 'idle'
+    this.char.state = char.asleep ? 'sleep'
+      : char.sad ? 'sad'
+      : 'idle'
     this.char.nextFrame = 0
   })
 
@@ -102,9 +104,9 @@ function DrawService (e) {
       tiles: {
         ball: {u0: 0.0, v0: 0.0, u1: 1/4, v1: 1/4},
         duck: {u0: 0.0, v0: 1/4, u1: 1/4, v1: 2/4},
-        bed1: {u0: 1/4, v0: 0.0, u1: 4/4, v1: 1/4},
-        bed2: {u0: 1/4, v0: 1/4, u1: 4/4, v1: 2/4},
-        bed3: {u0: 1/4, v0: 2/4, u1: 4/4, v1: 3/4},
+        bed1: {offsetY: 20, u0: 1/4, v0: 0.0, u1: 4/4, v1: 1/4},
+        bed2: {offsetY: 20, u0: 1/4, v0: 1/4, u1: 4/4, v1: 2/4},
+        bed3: {offsetY: 20, u0: 1/4, v0: 2/4, u1: 4/4, v1: 3/4},
       }
     }
 
@@ -154,7 +156,7 @@ function DrawService (e) {
     c.trans(0, 0)
 
     const {tiles, state, states, nextFrame} = this.char
-    this.drawBed(c, 1)
+    this.drawBed(c, s.bedLevel)
     renderObject(c, this.char, states[state][nextFrame])
 
     renderObject(c, this.icons, "hunger")

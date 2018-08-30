@@ -1,9 +1,4 @@
-(function () {
-  window.__ = (q) => document.querySelector(q)
-  window.on = (el, ev, c) => el.addEventListener(ev,c)
-  window.off = (el, ev) => el.removeEventListener(ev)
-  window.click = (el,c) => on(el, 'click',c)
-
+function Controls ({emit}) {
   const track = el => ev => {
     if (!el) {
       document.body.onmousemove = null
@@ -31,12 +26,12 @@
     __('#app').appendChild(duck)
   })
   click(__('#bed'), e => {
-    console.log('#bed')
+    emit('upgrade')
   })
   click(__('#feed'), e => {
     console.log('#feed')
   })
-})()
+}
 
 /* Handles drawing each element on the game */
 function DrawService (e) {
@@ -44,7 +39,9 @@ function DrawService (e) {
 
   e.on('char:update', char => {
     console.log('char:update');
-    this.char.state = char.sad ? 'sad' : 'idle'
+    this.char.state = char.asleep ? 'sleep'
+      : char.sad ? 'sad'
+      : 'idle'
     this.char.nextFrame = 0
   })
 
@@ -142,9 +139,9 @@ function DrawService (e) {
       tiles: {
         ball: {u0: 0.0, v0: 0.0, u1: 1/4, v1: 1/4},
         duck: {u0: 0.0, v0: 1/4, u1: 1/4, v1: 2/4},
-        bed1: {u0: 1/4, v0: 0.0, u1: 4/4, v1: 1/4},
-        bed2: {u0: 1/4, v0: 1/4, u1: 4/4, v1: 2/4},
-        bed3: {u0: 1/4, v0: 2/4, u1: 4/4, v1: 3/4},
+        bed1: {offsetY: 20, u0: 1/4, v0: 0.0, u1: 4/4, v1: 1/4},
+        bed2: {offsetY: 20, u0: 1/4, v0: 1/4, u1: 4/4, v1: 2/4},
+        bed3: {offsetY: 20, u0: 1/4, v0: 2/4, u1: 4/4, v1: 3/4},
       }
     }
 
@@ -194,7 +191,7 @@ function DrawService (e) {
     c.trans(0, 0)
 
     const {tiles, state, states, nextFrame} = this.char
-    this.drawBed(c, 1)
+    this.drawBed(c, s.bedLevel)
     renderObject(c, this.char, states[state][nextFrame])
 
     renderObject(c, this.icons, "hunger")
@@ -276,6 +273,7 @@ function Game (e) {
     asleep: false,
     hungry: false,
     sad: false,
+    bedLevel: 0,
   }
 
   const breedWiflies = () => {
@@ -326,13 +324,13 @@ function Game (e) {
     }
   }
 
-  const WIFLY_THERESHOLD = 3
+  const WIFLY_THERESHOLD = 4
   const MINIMUM_BAR_SIZE = 0.01
-  const MOOD_SPEED = 0.002
-  const SLEEP_SPEED = 0.001
+  const MOOD_SPEED = 0.005
+  const SLEEP_SPEED = 0.005
   const updateMood = () => {
-    const {wiflies, mood, hunger, sleep, sad} = this.state
-    if (sleep < 0.25) {
+    const {wiflies, mood, hunger, sleep, sad, asleep} = this.state
+    if (sleep < 0.3) {
       this.setState('asleep', true)
     }
     if (wiflies.length > WIFLY_THERESHOLD) {
@@ -342,7 +340,11 @@ function Game (e) {
     if (sleep < 0.2 || mood < 0.2 || hunger < 0.2) {
         this.setState('sad', true)
     }
-    this.incState('sleep', this.state.asleep ? SLEEP_SPEED : -SLEEP_SPEED)
+    this.incState('sleep', asleep ? SLEEP_SPEED : -SLEEP_SPEED)
+    if (asleep && sleep === 1) {
+      this.setState('asleep', false)
+      this.setState('sad', false)
+    }
   }
 
   this.setState = (key, value) => {
@@ -353,9 +355,9 @@ function Game (e) {
   }
   this.incState = (key, inc) => {
     const value = this.state[key] + inc
-    if (value >= MINIMUM_BAR_SIZE && value <= 1) {
-      this.state[key] = value
-    }
+    this.state[key] = value <= MINIMUM_BAR_SIZE ? MINIMUM_BAR_SIZE
+      : value >= 1 ? 1
+      : value
   }
 
   this.init = () => {
@@ -363,6 +365,12 @@ function Game (e) {
     setInterval(updateWiflies, 100)
     setInterval(updateMood, 1000)
     updateWiflies()
+
+    e.on('upgrade', () => {
+      if (this.state.bedLevel < 3) {
+        this.state.bedLevel++
+      }
+    })
   }
 }
 
@@ -720,3 +728,8 @@ function Events(target) {
   }
   window['TC'] = TinyCanvas;
 })();
+
+window.__ = (q) => document.querySelector(q)
+window.on = (el, ev, c) => el.addEventListener(ev,c)
+window.off = (el, ev) => el.removeEventListener(ev)
+window.click = (el,c) => on(el, 'click',c)
