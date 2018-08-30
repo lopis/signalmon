@@ -1,24 +1,40 @@
 /* Handles drawing each element on the game */
-function DrawService () {
+function DrawService (e) {
   let tick = 0
+
+  e.on('char:update', char => {
+    console.log('char:update');
+    this.char.state = char.sad ? 'sad' : 'idle'
+    this.char.nextFrame = 0
+  })
+
   this.init = (canvas) => {
     this.char = {
-      sprite: "char_red.png",
+      sprite: "char_green.png",
       width: canvas.c.width * 0.5,
       height: canvas.c.width * 0.5,
       posX: canvas.c.width * 0.25,
       posY: canvas.c.height * 0.5 - canvas.c.width * 0.25,
       tiles: {
-        idle0: {u0: 0.0, v0: 0.0, u1: 0.5, v1: 0.5},
-        idle1: {u0: 0.5, v0: 0.0, u1: 1.0, v1: 0.5},
-        idle2: {u0: 0.0, v0: 0.5, u1: 0.5, v1: 1.0},
-        idle3: {u0: 0.5, v0: 0.5, u1: 1.0, v1: 1.0},
+        lu:    {u0:   0, v0:   0, u1: 1/3, v1: 1/3},
+        ld:    {u0: 1/3, v0:   0, u1: 2/3, v1: 1/3},
+        ru:    {u0: 2/3, v0:   0, u1:   1, v1: 1/3},
+        rd:    {u0:   0, v0: 1/3, u1: 1/3, v1: 2/3},
+        sad:   {u0: 1/3, v0: 1/3, u1: 2/3, v1: 2/3},
+        eat1:  {u0: 2/3, v0: 1/3, u1:   1, v1: 2/3},
+        eat2:  {u0:   0, v0: 2/3, u1: 1/3, v1:   1},
+        eat3:  {u0: 1/3, v0: 2/3, u1: 2/3, v1:   1},
+        sleep: {u0: 2/3, v0: 2/3, u1:   1, v1:   1},
       },
       states: {
         idle: [
-          'idle0', 'idle1', 'idle0', 'idle1',
-          'idle2', 'idle3', 'idle2', 'idle3'
-        ]
+          'lu', 'ld', 'lu', 'ld',
+          'ru', 'rd', 'ru', 'rd'
+        ],
+        sad: ['sad'],
+        sleep: ['sleep'],
+        eat: ['eat1', 'eat2', 'eat3',
+              'eat2', 'eat3', 'eat2']
       }
     }
     this.icons = {
@@ -92,7 +108,7 @@ function DrawService () {
       }
     }
 
-    this.char.state = 'idle'
+    this.char.state = 'eat'
     this.char.nextFrame = 0
     setInterval(() => {
       const {nextFrame, tiles, state, states} = this.char
@@ -210,16 +226,14 @@ function DrawService () {
   }
 }
 
-function Game () {
+function Game (e) {
   this.state = {
-    mood: {
-      hunger: 1.0,
-      sleep: 1.0,
-      mood: 1.0
-    },
+    hunger: 1.0,
+    sleep: 1.0,
+    mood: 1.0,
     wiflies: [],
     deadWiflies: [],
-    sleeping: false,
+    asleep: false,
     hungry: false,
     sad: false,
   }
@@ -227,7 +241,7 @@ function Game () {
   const breedWiflies = () => {
     const {wiflies, deadWiflies} = this.state
 
-    if (navigator.onLine) {
+    if (navigator.onLine && wiflies.length < 15) {
       wiflies.push({
         x: Math.random(),
         y: Math.random() * 0.2
@@ -235,7 +249,7 @@ function Game () {
     } else if (wiflies.length > 0) {
       const dead = wiflies.pop()
       dead.isDead = true
-      dead.pos = 1.5 - ((dead.x - 0.5)**2)*2*Math.random()
+      dead.pos = 1.6 - ((dead.x - 0.5)**2)*3*Math.random()
       deadWiflies.push(dead)
     }
     setTimeout(breedWiflies, 9000 * Math.random() + 1000)
@@ -255,7 +269,7 @@ function Game () {
       newDirection = Math.PI / 2
       return {
         ...props,
-        y: y < pos ? y + 2*WIFLY_VELOCITY : y
+        y: y < pos ? y + 4*WIFLY_VELOCITY : y
       }
     } else  {
       let newDirection = (d + Math.random()) % (2 * Math.PI)
@@ -272,30 +286,36 @@ function Game () {
     }
   }
 
-  const WIFLY_THERESHOLD = 2
+  const WIFLY_THERESHOLD = 3
   const MINIMUM_BAR_SIZE = 0.01
   const MOOD_SPEED = 0.002
   const SLEEP_SPEED = 0.001
   const updateMood = () => {
-    const {wiflies, mood, sad} = this.state
-    const newState = this.state
-    if (sad) {
-      newState.sleep = false
-      newState.mood.mood = Math.max(
-        MINIMUM_BAR_SIZE,
-        mood.mood - wiflies.length * 0.002
-      )
+    const {wiflies, mood, hunger, sleep, sad} = this.state
+    if (sleep < 0.25) {
+      this.setState('asleep', true)
     }
-    if (wiflies.length > WIFLY_THERESHOLD
-      || mood.sleep < 0.1
-      || mood.mood < 0.1
-      || mood.hunger < 0.1) {
-        newState.sad = true
+    if (wiflies.length > WIFLY_THERESHOLD) {
+      this.setState('asleep', false)
+      this.incState('mood', - wiflies.length * 0.002)
     }
-    newState.mood.sleep = Math.max(
-      MINIMUM_BAR_SIZE,
-      mood.sleep - SLEEP_SPEED
-    )
+    if (sleep < 0.2 || mood < 0.2 || hunger < 0.2) {
+        this.setState('sad', true)
+    }
+    this.incState('sleep', this.state.asleep ? SLEEP_SPEED : -SLEEP_SPEED)
+  }
+
+  this.setState = (key, value) => {
+    if (this.state[key] !== value) {
+      this.state[key] = value
+      e.emit('char:update', this.state)
+    }
+  }
+  this.incState = (key, inc) => {
+    const value = this.state[key] + inc
+    if (value >= MINIMUM_BAR_SIZE && value <= 1) {
+      this.state[key] = value
+    }
   }
 
   this.init = () => {

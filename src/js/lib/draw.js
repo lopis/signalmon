@@ -1,24 +1,40 @@
 /* Handles drawing each element on the game */
-function DrawService () {
+function DrawService (e) {
   let tick = 0
+
+  e.on('char:update', char => {
+    console.log('char:update');
+    this.char.state = char.sad ? 'sad' : 'idle'
+    this.char.nextFrame = 0
+  })
+
   this.init = (canvas) => {
     this.char = {
-      sprite: "char_red.png",
+      sprite: "char_green.png",
       width: canvas.c.width * 0.5,
       height: canvas.c.width * 0.5,
       posX: canvas.c.width * 0.25,
       posY: canvas.c.height * 0.5 - canvas.c.width * 0.25,
       tiles: {
-        idle0: {u0: 0.0, v0: 0.0, u1: 0.5, v1: 0.5},
-        idle1: {u0: 0.5, v0: 0.0, u1: 1.0, v1: 0.5},
-        idle2: {u0: 0.0, v0: 0.5, u1: 0.5, v1: 1.0},
-        idle3: {u0: 0.5, v0: 0.5, u1: 1.0, v1: 1.0},
+        lu:    {u0:   0, v0:   0, u1: 1/3, v1: 1/3},
+        ld:    {u0: 1/3, v0:   0, u1: 2/3, v1: 1/3},
+        ru:    {u0: 2/3, v0:   0, u1:   1, v1: 1/3},
+        rd:    {u0:   0, v0: 1/3, u1: 1/3, v1: 2/3},
+        sad:   {u0: 1/3, v0: 1/3, u1: 2/3, v1: 2/3},
+        eat1:  {u0: 2/3, v0: 1/3, u1:   1, v1: 2/3},
+        eat2:  {u0:   0, v0: 2/3, u1: 1/3, v1:   1},
+        eat3:  {u0: 1/3, v0: 2/3, u1: 2/3, v1:   1},
+        sleep: {u0: 2/3, v0: 2/3, u1:   1, v1:   1},
       },
       states: {
         idle: [
-          'idle0', 'idle1', 'idle0', 'idle1',
-          'idle2', 'idle3', 'idle2', 'idle3'
-        ]
+          'lu', 'ld', 'lu', 'ld',
+          'ru', 'rd', 'ru', 'rd'
+        ],
+        sad: ['sad'],
+        sleep: ['sleep'],
+        eat: ['eat1', 'eat2', 'eat3',
+              'eat2', 'eat3', 'eat2']
       }
     }
     this.icons = {
@@ -92,7 +108,7 @@ function DrawService () {
       }
     }
 
-    this.char.state = 'idle'
+    this.char.state = 'eat'
     this.char.nextFrame = 0
     setInterval(() => {
       const {nextFrame, tiles, state, states} = this.char

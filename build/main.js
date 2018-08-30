@@ -4,13 +4,14 @@
   c.height = document.body.clientHeight
   const canvas = TC(c)
 
-  const ds = new DrawService()
-  const game = new Game()
+  const e = new Events()
+  const ds = new DrawService(e)
+  const game = new Game(e)
 
   const mainLoop = () => {
     try {
       ds.draw(canvas)
-      ds.drawMoodBars(canvas, game.state.mood)
+      ds.drawMoodBars(canvas, game.state)
       ds.drawWiflies(canvas, game.state.wiflies)
       ds.drawWiflies(canvas, game.state.deadWiflies, true)
       setTimeout(() => {
