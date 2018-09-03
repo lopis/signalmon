@@ -95,6 +95,17 @@ function DrawService (e) {
         dead: ["dead0", "dead1"]
       }
     }
+    this.buzzard = {
+      sprite: "buzzard.png",
+      width: canvas.c.width * 0.1,
+      height: canvas.c.width * 0.1,
+      tiles: {
+        0: {u0:   0, v0:   0, u1:   1, v1: 1/2},
+        1: {u0:   0, v0: 1/2, u1:   1, v1:   1},
+        dead0: {u0: 0.0, v0: 2/3, u1: 0.5, v1: 1.0},
+        dead1: {u0: 0.5, v0: 2/3, u1: 1.0, v1: 1.0},
+      }
+    }
     this.items = {
       sprite: "items.png",
       width: canvas.c.width * 0.125,
@@ -129,6 +140,7 @@ function DrawService (e) {
       loadSprite(this.items, canvas),
       loadSprite(this.icons, canvas),
       loadSprite(this.wifly, canvas),
+      loadSprite(this.buzzard, canvas),
     ])
   }
 
@@ -210,6 +222,22 @@ function DrawService (e) {
         posX: x * canvas.c.width,
         posY: y * canvas.c.height * 0.4
       }, frame)
+    })
+    canvas.pop()
+    canvas.flush()
+  }
+
+  this.drawBuzzards = (canvas, buzzards) => {
+    canvas.push()
+    canvas.trans(0, 0)
+    buzzards.forEach(({x=0, y=0, halt, frame = 0}, i) => {
+      const nextFrame = (halt ? frame : frame + 1) % 2
+      renderObject(canvas, {
+        ...this.buzzard,
+        posX: x * canvas.c.width,
+        posY: y * canvas.c.height
+      }, nextFrame)
+      buzzards[i].frame = nextFrame
     })
     canvas.pop()
     canvas.flush()

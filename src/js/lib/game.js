@@ -3,6 +3,7 @@ function Game (e) {
     hunger: 1.0,
     sleep: 1.0,
     mood: 1.0,
+    buzzards: [],
     wiflies: [],
     deadWiflies: [],
     asleep: false,
@@ -29,9 +30,20 @@ function Game (e) {
   }
 
   const updateWiflies = () => {
-    const {wiflies, deadWiflies} = this.state
+    const {wiflies, deadWiflies, buzzards} = this.state
     this.state.wiflies = wiflies.map(updatePosition)
     this.state.deadWiflies = deadWiflies.map(updatePosition)
+    this.state.buzzards = buzzards.map(updateHPosition)
+  }
+
+  const BUZZARD_VELOCITY = 0.005
+  const updateHPosition = (props) => {
+    const {x=0} = props
+
+    return {
+      ...props,
+      x: x > 1.0 ? -0.1 : x + BUZZARD_VELOCITY
+    }
   }
 
   const WIFLY_VELOCITY = 0.02
@@ -105,6 +117,23 @@ function Game (e) {
       if (this.state.bedLevel < 3) {
         this.state.bedLevel++
       }
+    })
+
+    e.on('sound', () => {
+      this.hadSound = true
+    })
+
+    this.state.buzzards.push({
+      x: -0.1,
+      y: 0.55 + Math.random()*0.1
+    })
+    this.state.buzzards.push({
+      x: -0.2,
+      y: 0.55 + Math.random()*0.1
+    })
+    this.state.buzzards.push({
+      x: -0.3,
+      y: 0.55 + Math.random()*0.1
     })
   }
 }

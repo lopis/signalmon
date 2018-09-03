@@ -6,6 +6,7 @@ function Microphone () {
   let valueAccumulator
   let valueCount
   let level = 0
+  const LOUD_SOUND_THERESHOLD = 7000
 
   const init = () => {
     audioCtx = new window.AudioContext()
@@ -44,6 +45,8 @@ function Microphone () {
   this.getLevel = () => {
     return level
   }
+
+  this.hadSoundSpike = () => this.getLevel() > LOUD_SOUND_THERESHOLD
 
   init()
 }

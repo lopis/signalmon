@@ -3,10 +3,9 @@ function Controls ({emit}) {
     if (!el) {
       document.body.onmousemove = null
     } else {
-      const x = el.offsetParent.offsetLeft
-      const y = el.offsetParent.offsetTop
+      const x = el.offsetParent.offsetLeft + 32
+      const y = el.offsetParent.offsetTop + 32
       document.body.onmousemove = ({clientX, clientY}) => {
-        console.log('ev', clientY, y);
         el.style.top = `${clientY - y}px`
         el.style.left = `${clientX - x}px`
       }
