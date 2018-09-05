@@ -15,11 +15,11 @@ var success = chalk.green;
 var regular = chalk.white;
 
 gulp.task('watch', (done) => {
-	gulp.watch('./src/js/lib/*.js', gulp.series('build-js-lib-dev', 'check'));
-	gulp.watch('./src/js/*.js', gulp.series('build-js-dev', 'check'));
-	gulp.watch('./src/html/**/*.html', gulp.series('build-html', 'check'));
-	gulp.watch('./src/css/**/*.css', gulp.series('build-css', 'check'));
-	gulp.watch('./src/assets/**/*', gulp.series('build-assets', 'check'));
+	gulp.watch('./src/js/lib/*.js', gulp.series('build-dev'));
+	gulp.watch('./src/js/*.js', gulp.series('build-dev'));
+	gulp.watch('./src/html/**/*.html', gulp.series('build-dev'));
+	gulp.watch('./src/css/**/*.css', gulp.series('build-dev'));
+	gulp.watch('./src/assets/**/*', gulp.series('build-dev'));
 });
 
 gulp.task('init', (done) => {
@@ -108,10 +108,12 @@ gulp.task('build-prod', gulp.series(
 ));
 gulp.task('build-dev', gulp.series(
 	'build-html',
+	'build-js',
+	'build-js-lib',
+	'check',
 	'build-js-dev',
 	'build-js-lib-dev',
 	'build-css',
 	'build-assets',
-	'check',
 	(done) => {done();}
 ));

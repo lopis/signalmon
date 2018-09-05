@@ -230,14 +230,13 @@ function DrawService (e) {
   this.drawBuzzards = (canvas, buzzards) => {
     canvas.push()
     canvas.trans(0, 0)
-    buzzards.forEach(({x=0, y=0, halt, frame = 0}, i) => {
-      const nextFrame = (halt ? frame : frame + 1) % 2
+    buzzards.forEach(({x=0, y=0, halt}, i) => {
+      const frame = halt ? 0 : tick%2
       renderObject(canvas, {
         ...this.buzzard,
         posX: x * canvas.c.width,
         posY: y * canvas.c.height
-      }, nextFrame)
-      buzzards[i].frame = nextFrame
+      }, frame)
     })
     canvas.pop()
     canvas.flush()

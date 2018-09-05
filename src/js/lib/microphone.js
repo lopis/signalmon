@@ -6,7 +6,10 @@ function Microphone () {
   let valueAccumulator
   let valueCount
   let level = 0
-  const LOUD_SOUND_THERESHOLD = 7000
+
+  // TODO: adapt the sound limits throughout the game runtime
+  // By collecting the loudest and quietest possible sounds
+  const LOUD_SOUND_THERESHOLD = 200
 
   const init = () => {
     audioCtx = new window.AudioContext()
