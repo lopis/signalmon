@@ -1,6 +1,7 @@
 /* Handles drawing each element on the game */
 function DrawService (e) {
   let tick = 0
+  let px
 
   e.on('char:update', char => {
     console.log('char:update');
@@ -11,12 +12,15 @@ function DrawService (e) {
   })
 
   this.init = (canvas) => {
+    px = canvas.c.width * 0.01
+
+
     this.char = {
       sprite: "char_green.png",
-      width: canvas.c.width * 0.5,
-      height: canvas.c.width * 0.5,
+      width: 50 * px,
+      height: 50 * px,
       posX: canvas.c.width * 0.25,
-      posY: canvas.c.height * 0.5 - canvas.c.width * 0.25,
+      posY: canvas.c.height * 0.5 - 25 * px,
       tiles: {
         lu:    {u0:   0, v0:   0, u1: 1/3, v1: 1/3},
         ld:    {u0: 1/3, v0:   0, u1: 2/3, v1: 1/3},
@@ -41,40 +45,40 @@ function DrawService (e) {
     }
     this.icons = {
       sprite: "mood_icons.png",
-      width: canvas.c.width * 0.05,
-      height: canvas.c.width * 0.05,
+      width: 10 * px,
+      height: 10 * px,
       posX: 0,
-      posY: canvas.c.height,
+      posY: canvas.c.height - 20*px,
       tiles: {
         hunger: {
           offsetX: canvas.c.width * 0.10,
-          offsetY: - canvas.c.width * 0.45,
+          offsetY: - 30*px,
           u0: 0, v0: 0, u1: 0.5, v1: 0.5
         },
         sleep: {
           offsetX: canvas.c.width * 0.10,
-          offsetY: - canvas.c.width * 0.35,
+          offsetY: - 20*px,
           u0: 0.5, v0: 0, u1: 1, v1: 0.5
         },
         mood: {
           offsetX: canvas.c.width * 0.10,
-          offsetY: - canvas.c.width * 0.25,
+          offsetY: - 10*px,
           u0: 0, v0: 0.5, u1: 0.5, v1: 1
         },
         hungerBar: {
           offsetX: canvas.c.width * 0.20,
-          offsetY: - canvas.c.width * 0.45,
+          offsetY: - 30*px,
           u0: 0.8, v0: 0.8, u1: 0.9, v1: 0.9
         },
         sleepBar: {
           offsetX: canvas.c.width * 0.20,
-          offsetY: - canvas.c.width * 0.35,
+          offsetY: - 20*px,
           u0: 0.8, v0: 0.9, u1: 0.9, v1: 1.0
         },
         moodBar: {
           offsetX: canvas.c.width * 0.20,
-          offsetY: - canvas.c.width * 0.25,
-          u0: 0.9, v0: 0.8, u1: 1, v1: 0.9
+          offsetY: - 10*px,
+          u0: 0.91, v0: 0.8, u1: 1, v1: 0.9
         },
       }
     }
@@ -107,17 +111,16 @@ function DrawService (e) {
       }
     }
     this.items = {
-      sprite: "items.png",
+      sprite: "beds.png",
       width: canvas.c.width * 0.125,
       height: canvas.c.width * 0.125,
       posX: canvas.c.width * 0.25,
       posY: canvas.c.height * 0.5 - canvas.c.width * 0.25,
       tiles: {
-        ball: {u0: 0.0, v0: 0.0, u1: 1/4, v1: 1/4},
-        duck: {u0: 0.0, v0: 1/4, u1: 1/4, v1: 2/4},
         bed1: {offsetY: 20, u0: 1/4, v0: 0.0, u1: 4/4, v1: 1/4},
         bed2: {offsetY: 20, u0: 1/4, v0: 1/4, u1: 4/4, v1: 2/4},
         bed3: {offsetY: 20, u0: 1/4, v0: 2/4, u1: 4/4, v1: 3/4},
+        bed4: {offsetY: 20, u0: 1/4, v0: 2/4, u1: 4/4, v1: 3/4},
       }
     }
 

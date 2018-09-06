@@ -8,7 +8,7 @@
   const ds = new DrawService(e)
   const game = new Game(e)
   const controls = new Controls(e)
-  const m = new Microphone()
+  // const m = new Microphone()
 
   const mainLoop = () => {
     try {
@@ -17,9 +17,9 @@
       ds.drawWiflies(canvas, game.state.wiflies)
       ds.drawWiflies(canvas, game.state.deadWiflies, true)
       ds.drawBuzzards(canvas, game.state.buzzards)
-      if (m.hadSoundSpike()) {
-        e.emit('sound')
-      }
+      // if (m.hadSoundSpike()) {
+      //   e.emit('sound')
+      // }
       setTimeout(() => {
         requestAnimationFrame(mainLoop)
       }, 32)
