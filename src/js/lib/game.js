@@ -104,18 +104,25 @@ function Game (e) {
     }
     if (wiflies.length > WIFLY_THERESHOLD) {
       this.setState('asleep', false)
-      this.incState('mood', - wiflies.length * 0.002)
+      this.incState('mood', - wiflies.length * MOOD_SPEED / (1 + this.state.bedLevel))
     }
 
-    this.incState('mood', buzzards.length * 0.008)
+    this.incState(
+      'mood',
+      buzzards.length * 0.008
+    )
     if (buzzards.length > 1) {
       this.setState('asleep', false)
     }
 
-    if (sleep < 0.2 || mood < 0.2 || hunger < 0.2) {
+    if ((!asleep && sleep < 0.2) || mood < 0.2 || hunger < 0.2) {
         this.setState('sad', true)
     }
-    this.incState('sleep', asleep ? SLEEP_SPEED : -SLEEP_SPEED)
+    this.incState('sleep',
+      asleep ?
+      SLEEP_SPEED * (1 + this.state.bedLevel) :
+      -SLEEP_SPEED
+    )
     if (asleep && sleep === 1) {
       this.setState('asleep', false)
       this.setState('sad', false)
@@ -156,8 +163,21 @@ function Game (e) {
     setInterval(updateBuzzards, 2000)
     updateWiflies()
 
+    this.state.wiflies.push({
+      x: Math.random(),
+      y: Math.random() * 0.2
+    })
+    this.state.wiflies.push({
+      x: Math.random(),
+      y: Math.random() * 0.2
+    })
+    this.state.wiflies.push({
+      x: Math.random(),
+      y: Math.random() * 0.2
+    })
+
     e.on('upgrade', () => {
-      if (this.state.bedLevel < 3) {
+      if (this.state.bedLevel < 4) {
         this.state.bedLevel++
       }
     })

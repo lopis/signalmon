@@ -1,1 +1,33 @@
-!function(){const e=document.getElementById("canvas");e.width=__("#app").clientWidth,e.height=__("#app").clientHeight;const t=TC(e),a=new Events,i=new DrawService(a),n=new Game(a),s=(new Controls(a),()=>{try{i.draw(t,n.state),i.drawMoodBars(t,n.state),i.drawWiflies(t,n.state.wiflies),i.drawWiflies(t,n.state.deadWiflies,!0),i.drawBuzzards(t,n.state.buzzards),setTimeout(()=>{requestAnimationFrame(s)},32)}catch(e){console.error(e)}});n.init(),i.init(t).then(s)}();
+(function() {
+  const c = document.getElementById('canvas')
+  c.width = __('#app').clientWidth
+  c.height = __('#app').clientHeight
+  const canvas = TC(c)
+
+  const e = new Events()
+  const ds = new DrawService(e)
+  const game = new Game(e)
+  const controls = new Controls(e)
+  // const m = new Microphone()
+
+  const mainLoop = () => {
+    try {
+      ds.draw(canvas, game.state)
+      ds.drawMoodBars(canvas, game.state)
+      ds.drawWiflies(canvas, game.state.wiflies)
+      ds.drawWiflies(canvas, game.state.deadWiflies, true)
+      ds.drawBuzzards(canvas, game.state.buzzards)
+      // if (m.hadSoundSpike()) {
+      //   e.emit('sound')
+      // }
+      setTimeout(() => {
+        requestAnimationFrame(mainLoop)
+      }, 32)
+    } catch (e) {
+      console.error(e)
+    }
+  }
+
+  game.init()
+  ds.init(canvas).then(mainLoop)
+})();

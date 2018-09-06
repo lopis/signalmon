@@ -110,17 +110,17 @@ function DrawService (e) {
         dead1: {u0: 0.5, v0: 2/3, u1: 1.0, v1: 1.0},
       }
     }
-    this.items = {
+    this.beds = {
       sprite: "beds.png",
-      width: canvas.c.width * 0.125,
-      height: canvas.c.width * 0.125,
-      posX: canvas.c.width * 0.25,
-      posY: canvas.c.height * 0.5 - canvas.c.width * 0.25,
+      width: 64*px,
+      height: 32*px,
+      posX: canvas.c.width * 0.5 - 32*px,
+      posY: canvas.c.height * 0.5 - 6*px,
       tiles: {
-        bed1: {offsetY: 20, u0: 1/4, v0: 0.0, u1: 4/4, v1: 1/4},
-        bed2: {offsetY: 20, u0: 1/4, v0: 1/4, u1: 4/4, v1: 2/4},
-        bed3: {offsetY: 20, u0: 1/4, v0: 2/4, u1: 4/4, v1: 3/4},
-        bed4: {offsetY: 20, u0: 1/4, v0: 2/4, u1: 4/4, v1: 3/4},
+        bed1: {u0: 0, v0: 0.0, u1: 1, v1: 1/4},
+        bed2: {u0: 0, v0: 1/4, u1: 1, v1: 2/4},
+        bed3: {u0: 0, v0: 2/4, u1: 1, v1: 3/4},
+        bed4: {u0: 0, v0: 3/4, u1: 1, v1: 4/4},
       }
     }
 
@@ -140,7 +140,7 @@ function DrawService (e) {
 
     return Promise.all([
       loadSprite(this.char, canvas),
-      loadSprite(this.items, canvas),
+      loadSprite(this.beds, canvas),
       loadSprite(this.icons, canvas),
       loadSprite(this.wifly, canvas),
       loadSprite(this.buzzard, canvas),
@@ -247,13 +247,7 @@ function DrawService (e) {
 
   this.drawBed = (canvas, bedLevel = 0) => {
     if (bedLevel > 0) {
-      renderObject(canvas, {
-        ...this.items,
-        width: canvas.c.width * 0.75,
-        height: canvas.c.width * 0.25,
-        posX: canvas.c.width * 0.125,
-        posY: canvas.c.height * 0.5 - canvas.c.width * 0.0625,
-      }, `bed${bedLevel}`)
+      renderObject(canvas, this.beds, `bed${bedLevel}`)
     }
   }
 }
