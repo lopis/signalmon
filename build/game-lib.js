@@ -28,7 +28,7 @@ function Controls ({emit}) {
     emit('upgrade')
   })
   click(__('#feed'), e => {
-    console.log('#feed')
+    emit('consume')
   })
 }
 
@@ -38,11 +38,11 @@ function DrawService (e) {
   let px
 
   e.on('char:update', char => {
-    console.log('char:update');
     this.char.state = char.asleep ? 'sleep'
       : char.sad ? 'sad'
+      : char.eating ? 'eat'
       : 'idle'
-    this.char.nextFrame = 0
+    this.resetCharAnimation()
   })
 
   this.init = (canvas) => {
@@ -74,7 +74,9 @@ function DrawService (e) {
         sad: ['sad'],
         sleep: ['sleep'],
         eat: ['eat1', 'eat2', 'eat3',
-              'eat2', 'eat3', 'eat2']
+              'eat2', 'eat3', 'eat2',
+              'eat3', 'eat2', 'eat3',
+              'eat3', 'eat2', 'eat3']
       }
     }
     this.icons = {
@@ -112,7 +114,7 @@ function DrawService (e) {
         moodBar: {
           offsetX: canvas.c.width * 0.20,
           offsetY: - 10*px,
-          u0: 0.91, v0: 0.8, u1: 1, v1: 0.9
+          u0: 0.90, v0: 0.8, u1: 1, v1: 0.9
         },
       }
     }
@@ -159,14 +161,18 @@ function DrawService (e) {
     }
 
     this.char.state = 'idle'
-    this.char.nextFrame = 0
-    setInterval(() => {
-      const {nextFrame, tiles, state, states} = this.char
-      this.char.nextFrame = nextFrame + 1
-      if (!tiles[states[state][nextFrame + 1]]) {
-        this.char.nextFrame = 0
-      }
-    }, 500)
+    this.resetCharAnimation = () => {
+      this.char.nextFrame = 0
+      if (this.charInterval) clearInterval(this.charInterval)
+      this.charInterval = setInterval(() => {
+        const {nextFrame, tiles, state, states} = this.char
+        this.char.nextFrame = nextFrame + 1
+        if (!tiles[states[state][nextFrame + 1]]) {
+          this.char.nextFrame = 0
+        }
+      }, 500)
+    }
+    this.resetCharAnimation()
 
     setInterval(() => {
       tick++
@@ -297,6 +303,7 @@ function Game (e) {
     asleep: false,
     hungry: false,
     sad: false,
+    eating: false,
     bedLevel: 0,
   }
 
@@ -307,20 +314,40 @@ function Game (e) {
     return this.hadSound;
   }
 
+  const createWifly = () => {
+    this.state.wiflies.push({
+      x: Math.random(),
+      y: Math.random() * 0.2
+    })
+  }
+
+  const updateDeadCount = () => {
+    const count = this.state.deadWiflies.length
+
+    __('#food span').innerText = count
+    if (count < 1) {
+      __('#feed').setAttribute('disabled', true)
+    } else {
+      __('#feed').removeAttribute('disabled')
+    }
+  }
+
+  const killWifly = () => {
+    const dead = this.state.wiflies.pop()
+    dead.isDead = true
+    dead.pos = 1.6 - ((dead.x - 0.5)**2)*3*Math.random()
+    // setTimeout(() => deadWiflies.shift(), 2000)
+    this.state.deadWiflies.push(dead)
+    updateDeadCount()
+  }
+
   const breedWiflies = () => {
     const {wiflies, deadWiflies} = this.state
 
     if (navigator.onLine && wiflies.length < 15) {
-      wiflies.push({
-        x: Math.random(),
-        y: Math.random() * 0.2
-      })
+      createWifly()
     } else if (!navigator.onLine && wiflies.length > 0) {
-      const dead = wiflies.pop()
-      dead.isDead = true
-      dead.pos = 1.6 - ((dead.x - 0.5)**2)*3*Math.random()
-      setTimeout(() => deadWiflies.shift(), 2000)
-      deadWiflies.push(dead)
+      killWifly()
     }
     setTimeout(breedWiflies, 20000 * Math.random() + 5000)
   }
@@ -385,14 +412,28 @@ function Game (e) {
   const MINIMUM_BAR_SIZE = 0.01
   const MOOD_SPEED = 0.005
   const SLEEP_SPEED = 0.005
+  const HUNGER_SPEED = 0.008
   const updateMood = () => {
-    const {wiflies, buzzards, mood, hunger, sleep, sad, asleep} = this.state
+    const {
+      asleep,
+      buzzards,
+      eating,
+      hunger,
+      mood,
+      sad,
+      sleep,
+      wiflies,
+    } = this.state
+
     if (sleep < 0.3) {
       this.setState('asleep', true)
     }
     if (wiflies.length > WIFLY_THERESHOLD) {
       this.setState('asleep', false)
-      this.incState('mood', - wiflies.length * MOOD_SPEED / (1 + this.state.bedLevel))
+      this.incState(
+        'mood',
+        - (wiflies.length - WIFLY_THERESHOLD) * MOOD_SPEED / (1 + this.state.bedLevel)
+      )
     }
 
     this.incState(
@@ -415,6 +456,10 @@ function Game (e) {
       this.setState('asleep', false)
       this.setState('sad', false)
     }
+    this.incState('hunger',
+      asleep ? -HUNGER_SPEED * 0.3
+      : eating ? HUNGER_SPEED * 5
+      : -HUNGER_SPEED)
   }
 
   this.setState = (key, value) => {
@@ -451,18 +496,16 @@ function Game (e) {
     setInterval(updateBuzzards, 2000)
     updateWiflies()
 
-    this.state.wiflies.push({
-      x: Math.random(),
-      y: Math.random() * 0.2
-    })
-    this.state.wiflies.push({
-      x: Math.random(),
-      y: Math.random() * 0.2
-    })
-    this.state.wiflies.push({
-      x: Math.random(),
-      y: Math.random() * 0.2
-    })
+    createWifly()
+    createWifly()
+    createWifly()
+    createWifly()
+    createWifly()
+    killWifly()
+    killWifly()
+    killWifly()
+    killWifly()
+    killWifly()
 
     e.on('upgrade', () => {
       if (this.state.bedLevel < 4) {
@@ -472,6 +515,20 @@ function Game (e) {
 
     e.on('sound', () => {
       this.hadSound = true
+    })
+
+    e.on('consume', () => {
+      const {deadWiflies, eating, sleeping} = this.state
+
+      if (!sleeping && !eating && deadWiflies.length >= 1) {
+        const mealCount = Math.max(Math.min(deadWiflies.length, 5), 1)
+        this.setState('deadWiflies', deadWiflies.splice(mealCount))
+        this.setState('eating', true)
+        updateDeadCount()
+        setTimeout(() => {
+          this.setState('eating', false)
+        }, mealCount * 1000)
+      }
     })
   }
 }

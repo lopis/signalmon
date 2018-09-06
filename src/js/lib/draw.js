@@ -4,11 +4,11 @@ function DrawService (e) {
   let px
 
   e.on('char:update', char => {
-    console.log('char:update');
     this.char.state = char.asleep ? 'sleep'
       : char.sad ? 'sad'
+      : char.eating ? 'eat'
       : 'idle'
-    this.char.nextFrame = 0
+    this.resetCharAnimation()
   })
 
   this.init = (canvas) => {
@@ -40,7 +40,9 @@ function DrawService (e) {
         sad: ['sad'],
         sleep: ['sleep'],
         eat: ['eat1', 'eat2', 'eat3',
-              'eat2', 'eat3', 'eat2']
+              'eat2', 'eat3', 'eat2',
+              'eat3', 'eat2', 'eat3',
+              'eat3', 'eat2', 'eat3']
       }
     }
     this.icons = {
@@ -78,7 +80,7 @@ function DrawService (e) {
         moodBar: {
           offsetX: canvas.c.width * 0.20,
           offsetY: - 10*px,
-          u0: 0.91, v0: 0.8, u1: 1, v1: 0.9
+          u0: 0.90, v0: 0.8, u1: 1, v1: 0.9
         },
       }
     }
@@ -125,14 +127,18 @@ function DrawService (e) {
     }
 
     this.char.state = 'idle'
-    this.char.nextFrame = 0
-    setInterval(() => {
-      const {nextFrame, tiles, state, states} = this.char
-      this.char.nextFrame = nextFrame + 1
-      if (!tiles[states[state][nextFrame + 1]]) {
-        this.char.nextFrame = 0
-      }
-    }, 500)
+    this.resetCharAnimation = () => {
+      this.char.nextFrame = 0
+      if (this.charInterval) clearInterval(this.charInterval)
+      this.charInterval = setInterval(() => {
+        const {nextFrame, tiles, state, states} = this.char
+        this.char.nextFrame = nextFrame + 1
+        if (!tiles[states[state][nextFrame + 1]]) {
+          this.char.nextFrame = 0
+        }
+      }, 500)
+    }
+    this.resetCharAnimation()
 
     setInterval(() => {
       tick++

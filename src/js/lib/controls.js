@@ -28,6 +28,6 @@ function Controls ({emit}) {
     emit('upgrade')
   })
   click(__('#feed'), e => {
-    console.log('#feed')
+    emit('consume')
   })
 }
