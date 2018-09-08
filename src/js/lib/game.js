@@ -220,6 +220,7 @@ function Game (e) {
     e.on('upgrade', () => {
       if (this.state.bedLevel < 4) {
         this.state.bedLevel++
+        __('#bed span').innerText = `-${this.state.bedLevel * 100}`
       }
     })
 
@@ -230,6 +231,17 @@ function Game (e) {
     e.on('earn', () => {
       this.state.money++
       __('#money span').innerText = `${this.state.money}€`
+
+      const money = this.state.money
+      // if (money > 50) __('#ball').removeAttribute('disabled')
+      // else __('#ball').setAttribute('disabled', true)
+      //
+      // if (money > 75) __('#duck').removeAttribute('disabled')
+      // else __('#duck').setAttribute('disabled', true)
+
+      if (money > this.state.bedLevel * 100) __('#bed').removeAttribute('disabled')
+      else __('#bed').setAttribute('disabled', true)
+
     })
 
     e.on('consume', () => {

@@ -1,7 +1,6 @@
 /* Handles drawing each element on the game */
 function DrawService (e) {
   let tick = 0
-  let px
 
   e.on('char:update', char => {
     this.char.state = char.asleep ? 'sleep'
@@ -12,7 +11,7 @@ function DrawService (e) {
   })
 
   this.init = (canvas) => {
-    px = canvas.c.width * 0.01
+    window.px = canvas.c.width * 0.01
 
 
     this.char = {

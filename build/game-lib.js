@@ -1,16 +1,20 @@
 function Controls ({emit}) {
   const track = el => ev => {
     if (!el) {
+      console.log('touch end')
       document.body.onmousemove = null
     } else {
       const x = el.offsetParent.offsetLeft + 32
       const y = el.offsetParent.offsetTop + 32
-      document.body.onmousemove = ({clientX, clientY}) => {
+      console.log('touch start', x, y)
+      document.body.ontouchmove = ({changedTouches}) => {
+        const {clientY, clientX} = changedTouches[0]
         el.style.top = `${clientY - y}px`
         el.style.left = `${clientX - x}px`
       }
-      on(document.body, 'mouseup', track(null))
-      on(document.body, 'mouseleave', track(null))
+      // on(document.body, 'mouseup', track(null))
+      on(document.body, 'touchend', track(null))
+      // on(document.body, 'mouseleave', track(null))
     }
   }
 
@@ -21,7 +25,8 @@ function Controls ({emit}) {
     __('#duck').setAttribute('disabled', true)
     const duck = document.createElement('div')
     duck.className = 'duck-toy'
-    on(duck, 'mousedown', track(duck))
+    // on(duck, 'mousedown', track(duck))
+    on(duck, 'touchstart', track(duck))
     __('#app').appendChild(duck)
   })
   click(__('#bed'), e => {
@@ -35,7 +40,6 @@ function Controls ({emit}) {
 /* Handles drawing each element on the game */
 function DrawService (e) {
   let tick = 0
-  let px
 
   e.on('char:update', char => {
     this.char.state = char.asleep ? 'sleep'
@@ -46,7 +50,7 @@ function DrawService (e) {
   })
 
   this.init = (canvas) => {
-    px = canvas.c.width * 0.01
+    window.px = canvas.c.width * 0.01
 
 
     this.char = {
@@ -520,6 +524,7 @@ function Game (e) {
     e.on('upgrade', () => {
       if (this.state.bedLevel < 4) {
         this.state.bedLevel++
+        __('#bed span').innerText = `-${this.state.bedLevel * 100}`
       }
     })
 
@@ -530,6 +535,17 @@ function Game (e) {
     e.on('earn', () => {
       this.state.money++
       __('#money span').innerText = `${this.state.money}€`
+
+      const money = this.state.money
+      // if (money > 50) __('#ball').removeAttribute('disabled')
+      // else __('#ball').setAttribute('disabled', true)
+      //
+      // if (money > 75) __('#duck').removeAttribute('disabled')
+      // else __('#duck').setAttribute('disabled', true)
+
+      if (money > this.state.bedLevel * 100) __('#bed').removeAttribute('disabled')
+      else __('#bed').setAttribute('disabled', true)
+
     })
 
     e.on('consume', () => {
