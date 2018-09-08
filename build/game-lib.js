@@ -210,13 +210,17 @@ function DrawService (e) {
     c.push()
     c.trans(0, 0)
 
+    this.drawWiflies(c, s.wiflies)
+    this.drawWiflies(c, s.deadWiflies, true)
+
     const {tiles, state, states, nextFrame} = this.char
     this.drawBed(c, s.bedLevel)
+
     renderObject(c, this.char, states[state][nextFrame])
 
-    renderObject(c, this.icons, "hunger")
-    renderObject(c, this.icons, "sleep")
-    renderObject(c, this.icons, "mood")
+    this.drawMoodBars(c, s)
+    this.drawBuzzards(c, s.buzzards)
+
     c.pop()
     c.flush()
   }
@@ -237,8 +241,10 @@ function DrawService (e) {
   }
 
   this.drawMoodBars = (canvas, moodState) => {
-    canvas.push()
-    canvas.trans(0, 0)
+    renderObject(canvas, this.icons, "hunger")
+    renderObject(canvas, this.icons, "sleep")
+    renderObject(canvas, this.icons, "mood")
+
     renderObject(canvas, {
       ...this.icons,
       width: canvas.c.width * 0.7 * moodState.hunger
@@ -251,13 +257,9 @@ function DrawService (e) {
       ...this.icons,
       width: canvas.c.width * 0.7 * moodState.mood
     }, "moodBar")
-    canvas.pop()
-    canvas.flush()
   }
 
   this.drawWiflies = (canvas, wiflies, areDead) => {
-    canvas.push()
-    canvas.trans(0, 0)
     wiflies.forEach(({x, y}, i) => {
       const frame = areDead ? `dead${tick%2}` : (i + tick)%4
       renderObject(canvas, {
@@ -266,23 +268,27 @@ function DrawService (e) {
         posY: y * canvas.c.height * 0.4
       }, frame)
     })
-    canvas.pop()
-    canvas.flush()
   }
 
   this.drawBuzzards = (canvas, buzzards) => {
-    canvas.push()
-    canvas.trans(0, 0)
-    buzzards.forEach(({x=0, y=0, halt}, i) => {
+    buzzards.forEach(({x=0, y=0, halt, mirror}, i) => {
+      if (mirror) {
+        canvas.trans(canvas.c.width, 0)
+        canvas.scale(-1, 1)
+      }
+
       const frame = halt ? 0 : tick%2
       renderObject(canvas, {
         ...this.buzzard,
         posX: x * canvas.c.width,
         posY: y * canvas.c.height
       }, frame)
+
+      if (mirror) {
+        canvas.scale(-1, 1)
+        canvas.trans(-canvas.c.width, 0)
+      }
     })
-    canvas.pop()
-    canvas.flush()
   }
 
   this.drawBed = (canvas, bedLevel = 0) => {
@@ -305,6 +311,7 @@ function Game (e) {
     sad: false,
     eating: false,
     bedLevel: 0,
+    money: 0
   }
 
   window.getState = () => {
@@ -316,8 +323,8 @@ function Game (e) {
 
   const createWifly = () => {
     this.state.wiflies.push({
-      x: Math.random(),
-      y: Math.random() * 0.2
+      x: Math.random() * 0.8 + 0.1,
+      y: Math.random() * 0.2 + 0.1
     })
   }
 
@@ -333,10 +340,9 @@ function Game (e) {
   }
 
   const killWifly = () => {
-    const dead = this.state.wiflies.pop()
+    const dead = this.state.wiflies.shift()
     dead.isDead = true
-    dead.pos = 1.6 - ((dead.x - 0.5)**2)*3*Math.random()
-    // setTimeout(() => deadWiflies.shift(), 2000)
+    dead.pos = 1.1 + ((dead.x - 0.5)**2)
     this.state.deadWiflies.push(dead)
     updateDeadCount()
   }
@@ -346,14 +352,17 @@ function Game (e) {
 
     if (navigator.onLine && wiflies.length < 15) {
       createWifly()
-    } else if (!navigator.onLine && wiflies.length > 0) {
+    }
+
+    if ((!navigator.onLine || Math.random() > 0.7) && wiflies.length > 0) {
       killWifly()
     }
-    setTimeout(breedWiflies, 20000 * Math.random() + 5000)
+    setTimeout(breedWiflies, 5000 * Math.random() + 5000)
   }
 
-  const updateWiflies = () => {
+  const updateCreatures = () => {
     const {wiflies, deadWiflies, buzzards} = this.state
+
     this.state.wiflies = wiflies.map(updatePosition)
     this.state.deadWiflies = deadWiflies.map(updatePosition)
     this.state.buzzards = buzzards.map(updateHPosition)
@@ -408,11 +417,11 @@ function Game (e) {
     }
   }
 
-  const WIFLY_THERESHOLD = 4
+  const WIFLY_THERESHOLD = 3
   const MINIMUM_BAR_SIZE = 0.01
   const MOOD_SPEED = 0.005
-  const SLEEP_SPEED = 0.005
-  const HUNGER_SPEED = 0.008
+  const SLEEP_SPEED = 0.002
+  const HUNGER_SPEED = 0.005
   const updateMood = () => {
     const {
       asleep,
@@ -428,18 +437,20 @@ function Game (e) {
     if (sleep < 0.3) {
       this.setState('asleep', true)
     }
+
+    let moodInc = 0
     if (wiflies.length > WIFLY_THERESHOLD) {
       this.setState('asleep', false)
-      this.incState(
-        'mood',
-        - (wiflies.length - WIFLY_THERESHOLD) * MOOD_SPEED / (1 + this.state.bedLevel)
-      )
+      moodInc -= wiflies.length - WIFLY_THERESHOLD
+      moodInc = moodInc * MOOD_SPEED
+      moodInc = moodInc / (1 + this.state.bedLevel)
+      this.incState('mood', moodInc)
     }
-
     this.incState(
       'mood',
-      buzzards.length * 0.008
+      buzzards.length * MOOD_SPEED
     )
+
     if (buzzards.length > 1) {
       this.setState('asleep', false)
     }
@@ -458,8 +469,12 @@ function Game (e) {
     }
     this.incState('hunger',
       asleep ? -HUNGER_SPEED * 0.3
-      : eating ? HUNGER_SPEED * 5
+      : eating ? HUNGER_SPEED * 10
       : -HUNGER_SPEED)
+
+    if (!sad) {
+      e.emit('earn')
+    }
   }
 
   this.setState = (key, value) => {
@@ -478,7 +493,8 @@ function Game (e) {
   const createBuzzard = () => {
     this.state.buzzards.push({
       x: -0.0,
-      y: 0.58 + Math.random()*0.1
+      y: 0.58 + Math.random()*0.1,
+      mirror: Math.random() > 0.5
     })
   }
 
@@ -491,21 +507,15 @@ function Game (e) {
 
   this.init = () => {
     breedWiflies()
-    setInterval(updateWiflies, 100)
+    setInterval(updateCreatures, 100)
     setInterval(updateMood, 1000)
     setInterval(updateBuzzards, 2000)
-    updateWiflies()
+    updateCreatures()
 
-    createWifly()
-    createWifly()
-    createWifly()
-    createWifly()
-    createWifly()
-    killWifly()
-    killWifly()
-    killWifly()
-    killWifly()
-    killWifly()
+    createBuzzard()
+    createBuzzard()
+    createBuzzard()
+    createBuzzard()
 
     e.on('upgrade', () => {
       if (this.state.bedLevel < 4) {
@@ -515,6 +525,11 @@ function Game (e) {
 
     e.on('sound', () => {
       this.hadSound = true
+    })
+
+    e.on('earn', () => {
+      this.state.money++
+      __('#money span').innerText = `${this.state.money}€`
     })
 
     e.on('consume', () => {
@@ -528,6 +543,8 @@ function Game (e) {
         setTimeout(() => {
           this.setState('eating', false)
         }, mealCount * 1000)
+      } else {
+        console.log(sleeping, eating, deadWiflies.length);
       }
     })
   }
@@ -541,10 +558,7 @@ function Microphone () {
   let valueAccumulator
   let valueCount
   let level = 0
-
-  // TODO: adapt the sound limits throughout the game runtime
-  // By collecting the loudest and quietest possible sounds
-  const LOUD_SOUND_THERESHOLD = 200
+  let average = 0
 
   const init = () => {
     audioCtx = new window.AudioContext()
@@ -574,17 +588,19 @@ function Microphone () {
   }
 
   const collectValues = () => {
-    level = Math.round(valueAccumulator / valueCount)
+    level = Math.round(valueAccumulator / valueCount) || 0
     valueAccumulator = 0
     valueCount = 0
     highest = 0
+    average = Math.round((average * 0.7) + level * 0.3)
+    __('#sound').innerHTML = `${level}<br>${average}`
   }
 
   this.getLevel = () => {
     return level
   }
 
-  this.hadSoundSpike = () => this.getLevel() > LOUD_SOUND_THERESHOLD
+  this.hadSoundSpike = () => level > 2 * average
 
   init()
 }

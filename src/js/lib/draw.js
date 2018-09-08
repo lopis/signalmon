@@ -176,13 +176,17 @@ function DrawService (e) {
     c.push()
     c.trans(0, 0)
 
+    this.drawWiflies(c, s.wiflies)
+    this.drawWiflies(c, s.deadWiflies, true)
+
     const {tiles, state, states, nextFrame} = this.char
     this.drawBed(c, s.bedLevel)
+
     renderObject(c, this.char, states[state][nextFrame])
 
-    renderObject(c, this.icons, "hunger")
-    renderObject(c, this.icons, "sleep")
-    renderObject(c, this.icons, "mood")
+    this.drawMoodBars(c, s)
+    this.drawBuzzards(c, s.buzzards)
+
     c.pop()
     c.flush()
   }
@@ -203,8 +207,10 @@ function DrawService (e) {
   }
 
   this.drawMoodBars = (canvas, moodState) => {
-    canvas.push()
-    canvas.trans(0, 0)
+    renderObject(canvas, this.icons, "hunger")
+    renderObject(canvas, this.icons, "sleep")
+    renderObject(canvas, this.icons, "mood")
+
     renderObject(canvas, {
       ...this.icons,
       width: canvas.c.width * 0.7 * moodState.hunger
@@ -217,13 +223,9 @@ function DrawService (e) {
       ...this.icons,
       width: canvas.c.width * 0.7 * moodState.mood
     }, "moodBar")
-    canvas.pop()
-    canvas.flush()
   }
 
   this.drawWiflies = (canvas, wiflies, areDead) => {
-    canvas.push()
-    canvas.trans(0, 0)
     wiflies.forEach(({x, y}, i) => {
       const frame = areDead ? `dead${tick%2}` : (i + tick)%4
       renderObject(canvas, {
@@ -232,23 +234,27 @@ function DrawService (e) {
         posY: y * canvas.c.height * 0.4
       }, frame)
     })
-    canvas.pop()
-    canvas.flush()
   }
 
   this.drawBuzzards = (canvas, buzzards) => {
-    canvas.push()
-    canvas.trans(0, 0)
-    buzzards.forEach(({x=0, y=0, halt}, i) => {
+    buzzards.forEach(({x=0, y=0, halt, mirror}, i) => {
+      if (mirror) {
+        canvas.trans(canvas.c.width, 0)
+        canvas.scale(-1, 1)
+      }
+
       const frame = halt ? 0 : tick%2
       renderObject(canvas, {
         ...this.buzzard,
         posX: x * canvas.c.width,
         posY: y * canvas.c.height
       }, frame)
+
+      if (mirror) {
+        canvas.scale(-1, 1)
+        canvas.trans(-canvas.c.width, 0)
+      }
     })
-    canvas.pop()
-    canvas.flush()
   }
 
   this.drawBed = (canvas, bedLevel = 0) => {

@@ -6,10 +6,7 @@ function Microphone () {
   let valueAccumulator
   let valueCount
   let level = 0
-
-  // TODO: adapt the sound limits throughout the game runtime
-  // By collecting the loudest and quietest possible sounds
-  const LOUD_SOUND_THERESHOLD = 200
+  let average = 0
 
   const init = () => {
     audioCtx = new window.AudioContext()
@@ -39,17 +36,19 @@ function Microphone () {
   }
 
   const collectValues = () => {
-    level = Math.round(valueAccumulator / valueCount)
+    level = Math.round(valueAccumulator / valueCount) || 0
     valueAccumulator = 0
     valueCount = 0
     highest = 0
+    average = Math.round((average * 0.7) + level * 0.3)
+    __('#sound').innerHTML = `${level}<br>${average}`
   }
 
   this.getLevel = () => {
     return level
   }
 
-  this.hadSoundSpike = () => this.getLevel() > LOUD_SOUND_THERESHOLD
+  this.hadSoundSpike = () => level > 2 * average
 
   init()
 }

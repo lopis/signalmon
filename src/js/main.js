@@ -13,10 +13,6 @@
   const mainLoop = () => {
     try {
       ds.draw(canvas, game.state)
-      ds.drawMoodBars(canvas, game.state)
-      ds.drawWiflies(canvas, game.state.wiflies)
-      ds.drawWiflies(canvas, game.state.deadWiflies, true)
-      ds.drawBuzzards(canvas, game.state.buzzards)
       if (m.hadSoundSpike()) {
         e.emit('sound')
       }
@@ -24,7 +20,7 @@
         requestAnimationFrame(mainLoop)
       }, 32)
     } catch (e) {
-      console.error(e)
+      throw e
     }
   }
 
