@@ -11,7 +11,7 @@ function Game (e) {
     sad: false,
     eating: false,
     bedLevel: 0,
-    money: 0
+    money: 220
   }
 
   window.getState = () => {
@@ -193,7 +193,7 @@ function Game (e) {
   const createBuzzard = () => {
     this.state.buzzards.push({
       x: -0.0,
-      y: 0.58 + Math.random()*0.1,
+      y: 0.55 + Math.random()*0.07,
       mirror: Math.random() > 0.5
     })
   }
@@ -205,6 +205,24 @@ function Game (e) {
     this.hadSound = false
   }
 
+  const updateMoney = () => {
+    __('#money span').innerText = `${this.state.money}€`
+
+    const money = this.state.money
+    if (money > 50) __('#ball').removeAttribute('disabled')
+    else __('#ball').setAttribute('disabled', true)
+
+    if (money > 75) __('#duck').removeAttribute('disabled')
+    else __('#duck').setAttribute('disabled', true)
+
+    if (this.state.bedLevel > 3) {
+      __('#bed').setAttribute('disabled', true)
+      __('#bed').className = 'disabled'
+    }
+    if (money > this.state.bedLevel * 100) __('#bed').removeAttribute('disabled')
+    else __('#bed').setAttribute('disabled', true)
+  }
+
   this.init = () => {
     breedWiflies()
     setInterval(updateCreatures, 100)
@@ -212,13 +230,9 @@ function Game (e) {
     setInterval(updateBuzzards, 2000)
     updateCreatures()
 
-    createBuzzard()
-    createBuzzard()
-    createBuzzard()
-    createBuzzard()
-
     e.on('upgrade', () => {
       if (this.state.bedLevel < 4) {
+        this.state.money -= this.state.bedLevel * 100
         this.state.bedLevel++
         __('#bed span').innerText = `-${this.state.bedLevel * 100}`
       }
@@ -230,18 +244,7 @@ function Game (e) {
 
     e.on('earn', () => {
       this.state.money++
-      __('#money span').innerText = `${this.state.money}€`
-
-      const money = this.state.money
-      // if (money > 50) __('#ball').removeAttribute('disabled')
-      // else __('#ball').setAttribute('disabled', true)
-      //
-      // if (money > 75) __('#duck').removeAttribute('disabled')
-      // else __('#duck').setAttribute('disabled', true)
-
-      if (money > this.state.bedLevel * 100) __('#bed').removeAttribute('disabled')
-      else __('#bed').setAttribute('disabled', true)
-
+      updateMoney()
     })
 
     e.on('consume', () => {
@@ -258,6 +261,10 @@ function Game (e) {
       } else {
         console.log(sleeping, eating, deadWiflies.length);
       }
+    })
+
+    e.on('spend', amount => {
+      this.state.money -= Math.abs(amount)
     })
   }
 }

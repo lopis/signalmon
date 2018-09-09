@@ -6,6 +6,7 @@ html, body {
   width: 100%;
   font-size: 16px;
   font-family: monospace;
+  user-select: none;
 }
 
 #app {
@@ -39,6 +40,10 @@ html, body {
   font-family: monospace;
   flex: 1;
   text-align: center;
+  outline: 0;
+}
+.item.disabled {
+  color: white;
 }
 .item::before {
   content: "";
@@ -47,37 +52,48 @@ html, body {
   margin: auto;
   display: block;
   background: url('items.png') no-repeat;
-  background-size: 96px;
+  background-size: 200%;
   vertical-align: middle;
+}
+.item.disabled::before {
+  background: none;
 }
 #ball::before {
   background-position: 0 0;
 }
 #duck::before {
-  background-position: 0 -24px;
+  background-position: 0 50%;
 }
 #bed::before {
-  background-position: 0 -48px;
+  background-position: 0 100%;
 }
 #feed::before {
-  background-position: 0 -72px;
-}
-#food::before {
-  background-position: -24px -72px;
+  background-position: 100% 0;
 }
 #money::before {
-  background-position: -48px -72px;
+  background-position: 100% 50%;
+}
+#food::before {
+  background-position: 100% 100%;
 }
 
 .duck-toy, .ball-toy {
-  background: url('items.png') no-repeat;
-  background-size: 400%;
-  background-position: 0 33%;
-  height: 32px;
-  width: 32px;
+  height: 64px;
+  width: 64px;
   position: absolute;
   top: 0;
   left: 0;
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+.duck-toy.hidden, .ball-toy.hidden {
+  display: none;
+}
+.duck-toy {
+  background-image: url('duck.png');
+}
+.ball-toy {
+  background-image: url('ball.png');
 }
 
 [disabled] {

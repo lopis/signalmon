@@ -1,34 +1,69 @@
 function Controls ({emit}) {
   const track = el => ev => {
-    if (!el) {
-      console.log('touch end')
-      document.body.onmousemove = null
-    } else {
-      const x = el.offsetParent.offsetLeft + 32
-      const y = el.offsetParent.offsetTop + 32
-      console.log('touch start', x, y)
-      document.body.ontouchmove = ({changedTouches}) => {
+    let speed = 0
+    let interval
+    let falling = false
+
+    if (el) {
+      const x = el.offsetParent.offsetLeft + 8*px
+      const y = el.offsetParent.offsetTop + 8*px
+      console.log('track')
+      const touchMove = on(document.body, 'touchmove', ({changedTouches}) => {
+        if (!el.offsetParent) {
+          off(document.body, 'touchmove', touchMove)
+          return
+        }
+        falling = false
+        speed = 0
         const {clientY, clientX} = changedTouches[0]
-        el.style.top = `${clientY - y}px`
-        el.style.left = `${clientX - x}px`
-      }
-      // on(document.body, 'mouseup', track(null))
-      on(document.body, 'touchend', track(null))
-      // on(document.body, 'mouseleave', track(null))
+        const left = Math.min(Math.max(0, clientX - x), el.offsetParent.clientWidth - 16*px)
+        const top = Math.min(Math.max(0, clientY - y), el.offsetParent.clientHeight*0.6 - 16*px)
+        el.style.top = `${Math.round(top / px) * px}px`
+        el.style.left = `${Math.round(left / px) * px}px`
+      })
+      on(document.body, 'touchend', () => {
+        // document.body.ontouchmove = null
+        falling = true
+      })
+      interval = setInterval(() => {
+        if (!el.offsetParent) {
+          clearInterval(interval)
+          return
+        }
+        const top = parseInt(el.style.top)
+        if (falling && top < el.offsetParent.clientHeight*0.51) {
+          speed++
+          el.style.top = `${top + speed*px}px`
+        }
+      }, 50)
     }
   }
 
-  click(__('#ball'), e => {
-    console.log('#ball')
-  })
-  click(__('#duck'), e => {
-    __('#duck').setAttribute('disabled', true)
-    const duck = document.createElement('div')
-    duck.className = 'duck-toy'
-    // on(duck, 'mousedown', track(duck))
-    on(duck, 'touchstart', track(duck))
-    __('#app').appendChild(duck)
-  })
+  const handleToy = (el, btn) => ev => {
+    el.classList.remove('hidden')
+    el.style.width = `${16*px}px`
+    el.style.height = `${16*px}px`
+    on(el, 'touchstart', track(el))
+    emit('spend', btn.innerText)
+    $ballBtn.setAttribute('disabled', true)
+    $ballBtn.classList.add('disabled')
+    $duckBtn.setAttribute('disabled', true)
+    $duckBtn.classList.add('disabled')
+    setTimeout(() => {
+      $duckBtn.classList.remove('disabled')
+      $ballBtn.classList.remove('disabled')
+      el.classList.add('hidden')
+    }, 10000)
+  }
+
+  const $ballBtn = __('#ball')
+  const $ball = __('.ball-toy')
+  click($ballBtn, handleToy($ball, $ballBtn))
+
+  const $duckBtn = __('#duck')
+  const $duck = __('.duck-toy')
+  click($duckBtn, handleToy($duck, $duckBtn))
+
   click(__('#bed'), e => {
     emit('upgrade')
   })
@@ -124,8 +159,8 @@ function DrawService (e) {
     }
     this.wifly = {
       sprite: "wiflies.png",
-      width: canvas.c.width * 0.1,
-      height: canvas.c.width * 0.1,
+      width: 16*px,
+      height: 16*px,
       tiles: {
         0: {u0: 0.0, v0: 0.0, u1: 0.5, v1: 1/3},
         1: {u0: 0.5, v0: 0.0, u1: 1.0, v1: 1/3},
@@ -141,8 +176,8 @@ function DrawService (e) {
     }
     this.buzzard = {
       sprite: "buzzard.png",
-      width: canvas.c.width * 0.1,
-      height: canvas.c.width * 0.1,
+      width: 16*px,
+      height: 16*px,
       tiles: {
         0: {u0:   0, v0:   0, u1:   1, v1: 1/2},
         1: {u0:   0, v0: 1/2, u1:   1, v1:   1},
@@ -315,7 +350,7 @@ function Game (e) {
     sad: false,
     eating: false,
     bedLevel: 0,
-    money: 0
+    money: 220
   }
 
   window.getState = () => {
@@ -497,7 +532,7 @@ function Game (e) {
   const createBuzzard = () => {
     this.state.buzzards.push({
       x: -0.0,
-      y: 0.58 + Math.random()*0.1,
+      y: 0.55 + Math.random()*0.07,
       mirror: Math.random() > 0.5
     })
   }
@@ -509,6 +544,24 @@ function Game (e) {
     this.hadSound = false
   }
 
+  const updateMoney = () => {
+    __('#money span').innerText = `${this.state.money}€`
+
+    const money = this.state.money
+    if (money > 50) __('#ball').removeAttribute('disabled')
+    else __('#ball').setAttribute('disabled', true)
+
+    if (money > 75) __('#duck').removeAttribute('disabled')
+    else __('#duck').setAttribute('disabled', true)
+
+    if (this.state.bedLevel > 3) {
+      __('#bed').setAttribute('disabled', true)
+      __('#bed').className = 'disabled'
+    }
+    if (money > this.state.bedLevel * 100) __('#bed').removeAttribute('disabled')
+    else __('#bed').setAttribute('disabled', true)
+  }
+
   this.init = () => {
     breedWiflies()
     setInterval(updateCreatures, 100)
@@ -516,13 +569,9 @@ function Game (e) {
     setInterval(updateBuzzards, 2000)
     updateCreatures()
 
-    createBuzzard()
-    createBuzzard()
-    createBuzzard()
-    createBuzzard()
-
     e.on('upgrade', () => {
       if (this.state.bedLevel < 4) {
+        this.state.money -= this.state.bedLevel * 100
         this.state.bedLevel++
         __('#bed span').innerText = `-${this.state.bedLevel * 100}`
       }
@@ -534,18 +583,7 @@ function Game (e) {
 
     e.on('earn', () => {
       this.state.money++
-      __('#money span').innerText = `${this.state.money}€`
-
-      const money = this.state.money
-      // if (money > 50) __('#ball').removeAttribute('disabled')
-      // else __('#ball').setAttribute('disabled', true)
-      //
-      // if (money > 75) __('#duck').removeAttribute('disabled')
-      // else __('#duck').setAttribute('disabled', true)
-
-      if (money > this.state.bedLevel * 100) __('#bed').removeAttribute('disabled')
-      else __('#bed').setAttribute('disabled', true)
-
+      updateMoney()
     })
 
     e.on('consume', () => {
@@ -562,6 +600,10 @@ function Game (e) {
       } else {
         console.log(sleeping, eating, deadWiflies.length);
       }
+    })
+
+    e.on('spend', amount => {
+      this.state.money -= Math.abs(amount)
     })
   }
 }
@@ -928,5 +970,5 @@ function Events(target) {
 
 window.__ = (q) => document.querySelector(q)
 window.on = (el, ev, c) => el.addEventListener(ev,c)
-window.off = (el, ev) => el.removeEventListener(ev)
+window.off = (el, type, ev) => el.removeEventListener(type, ev)
 window.click = (el,c) => on(el, 'click',c)

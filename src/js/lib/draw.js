@@ -85,8 +85,8 @@ function DrawService (e) {
     }
     this.wifly = {
       sprite: "wiflies.png",
-      width: canvas.c.width * 0.1,
-      height: canvas.c.width * 0.1,
+      width: 16*px,
+      height: 16*px,
       tiles: {
         0: {u0: 0.0, v0: 0.0, u1: 0.5, v1: 1/3},
         1: {u0: 0.5, v0: 0.0, u1: 1.0, v1: 1/3},
@@ -102,8 +102,8 @@ function DrawService (e) {
     }
     this.buzzard = {
       sprite: "buzzard.png",
-      width: canvas.c.width * 0.1,
-      height: canvas.c.width * 0.1,
+      width: 16*px,
+      height: 16*px,
       tiles: {
         0: {u0:   0, v0:   0, u1:   1, v1: 1/2},
         1: {u0:   0, v0: 1/2, u1:   1, v1:   1},
