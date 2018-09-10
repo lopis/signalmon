@@ -78,8 +78,8 @@ function DrawService (e) {
 
   e.on('char:update', char => {
     this.char.state = char.asleep ? 'sleep'
-      : char.sad ? 'sad'
       : char.eating ? 'eat'
+      : char.sad ? 'sad'
       : 'idle'
     this.resetCharAnimation()
   })
