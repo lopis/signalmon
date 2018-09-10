@@ -450,6 +450,12 @@ function Game (e) {
     this.state.buzzards = buzzards.map(updateHPosition)
       .filter(keepAlive)
       .sort((a,b) => a.y > b.y)
+      
+    if (navigator.onLine) {
+      __('#signal #meter').style.height = '100%'
+    } else {
+      __('#signal #meter').style.height = '5%'
+    }
   }
 
   const keepAlive = (props) => {
@@ -565,6 +571,12 @@ function Game (e) {
       : -HUNGER_SPEED)
 
     if (!sad) {
+      e.emit('earn')
+    }
+    if (mood > 0.75) {
+      e.emit('earn')
+    }
+    if (mood > 0.95) {
       e.emit('earn')
     }
   }
@@ -704,10 +716,10 @@ function Microphone () {
     valueCount = 0
     highest = 0
     average = Math.round((average * 0.5) + level * 0.5)
-    if (average < 100) {
-      __('#meter').style.width = `${level}%`
+    if (level < 100) {
+      __('#meter').style.height = `${level}%`
     } else {
-      __('#meter').style.width = `${Math.min(100, (100*level)/(1.5*average))}%`
+      __('#meter').style.height = `${Math.min(100, (100*level)/(1.5*average))}%`
     }
   }
 

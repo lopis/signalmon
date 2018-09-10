@@ -41,10 +41,10 @@ function Microphone () {
     valueCount = 0
     highest = 0
     average = Math.round((average * 0.5) + level * 0.5)
-    if (average < 100) {
-      __('#meter').style.width = `${level}%`
+    if (level < 100) {
+      __('#meter').style.height = `${level}%`
     } else {
-      __('#meter').style.width = `${Math.min(100, (100*level)/(1.5*average))}%`
+      __('#meter').style.height = `${Math.min(100, (100*level)/(1.5*average))}%`
     }
   }
 

@@ -68,6 +68,12 @@ function Game (e) {
     this.state.buzzards = buzzards.map(updateHPosition)
       .filter(keepAlive)
       .sort((a,b) => a.y > b.y)
+      
+    if (navigator.onLine) {
+      __('#signal #meter').style.height = '100%'
+    } else {
+      __('#signal #meter').style.height = '5%'
+    }
   }
 
   const keepAlive = (props) => {
@@ -183,6 +189,12 @@ function Game (e) {
       : -HUNGER_SPEED)
 
     if (!sad) {
+      e.emit('earn')
+    }
+    if (mood > 0.75) {
+      e.emit('earn')
+    }
+    if (mood > 0.95) {
       e.emit('earn')
     }
   }
