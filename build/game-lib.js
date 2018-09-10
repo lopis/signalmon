@@ -1,13 +1,12 @@
 function Controls ({emit}) {
-  const track = el => ev => {
-    let speed = 0
-    let interval
-    let falling = false
+  let speed = 0
+  let interval
+  let falling = true
 
+  const track = el => ev => {
     if (el) {
       const x = el.offsetParent.offsetLeft + 8*px
       const y = el.offsetParent.offsetTop + 8*px
-      console.log('track')
       const touchMove = on(document.body, 'touchmove', ({changedTouches}) => {
         if (!el.offsetParent) {
           off(document.body, 'touchmove', touchMove)
@@ -20,9 +19,9 @@ function Controls ({emit}) {
         const top = Math.min(Math.max(0, clientY - y), el.offsetParent.clientHeight*0.6 - 16*px)
         el.style.top = `${Math.round(top / px) * px}px`
         el.style.left = `${Math.round(left / px) * px}px`
+        emit('play')
       })
       on(document.body, 'touchend', () => {
-        // document.body.ontouchmove = null
         falling = true
       })
       interval = setInterval(() => {
@@ -39,11 +38,29 @@ function Controls ({emit}) {
     }
   }
 
-  const handleToy = (el, btn) => ev => {
+  const gravitate = el => {
+    speed = 0
+    interval = setInterval(() => {
+      if (!el || !el.offsetParent) {
+        clearInterval(interval)
+        return
+      }
+      const top = parseInt(el.style.top)
+      if (falling && top < el.offsetParent.clientHeight*0.51) {
+        speed++
+        el.style.top = `${top + speed*px}px`
+      }
+    }, 50)
+  }
+
+  const handleToy = (el, btn, life=10) => ev => {
     el.classList.remove('hidden')
     el.style.width = `${16*px}px`
     el.style.height = `${16*px}px`
+    el.style.top = `${32*px}px`
+    el.style.left = `20%`
     on(el, 'touchstart', track(el))
+    gravitate(el)
     emit('spend', btn.innerText)
     $ballBtn.setAttribute('disabled', true)
     $ballBtn.classList.add('disabled')
@@ -53,7 +70,8 @@ function Controls ({emit}) {
       $duckBtn.classList.remove('disabled')
       $ballBtn.classList.remove('disabled')
       el.classList.add('hidden')
-    }, 10000)
+      gravitate(null)
+    }, life * 1000)
   }
 
   const $ballBtn = __('#ball')
@@ -62,7 +80,7 @@ function Controls ({emit}) {
 
   const $duckBtn = __('#duck')
   const $duck = __('.duck-toy')
-  click($duckBtn, handleToy($duck, $duckBtn))
+  click($duckBtn, handleToy($duck, $duckBtn, 20))
 
   click(__('#bed'), e => {
     emit('upgrade')
@@ -385,6 +403,7 @@ function Game (e) {
     hunger: 1.0,
     sleep: 1.0,
     mood: 1.0,
+    moodBuffer: 0.0,
     buzzards: [],
     wiflies: [],
     deadWiflies: [],
@@ -393,7 +412,7 @@ function Game (e) {
     sad: false,
     eating: false,
     bedLevel: 0,
-    money: 220
+    money: 0
   }
 
   window.getState = () => {
@@ -450,7 +469,7 @@ function Game (e) {
     this.state.buzzards = buzzards.map(updateHPosition)
       .filter(keepAlive)
       .sort((a,b) => a.y > b.y)
-      
+
     if (navigator.onLine) {
       __('#signal #meter').style.height = '100%'
     } else {
@@ -520,9 +539,10 @@ function Game (e) {
       sad,
       sleep,
       wiflies,
+      moodBuffer,
     } = this.state
 
-    if (sleep < 0.5) {
+    if (sleep < 0.5 && !eating) {
       this.setState('asleep', true)
     }
 
@@ -543,14 +563,18 @@ function Game (e) {
       'mood',
       buzzards.length * MOOD_SPEED
     )
+    if (moodBuffer) {
+      console.log(moodBuffer);
+      e.emit('react', ['laugh', 'heart'])
+      this.incState('mood', moodBuffer)
+      this.state.moodBuffer = 0
+    }
 
-    if (buzzards.length > 2) {
-      if (asleep) {
-        e.emit('react', ['buzzard', 'sleep'])
-      } else {
-        e.emit('react', ['buzzard', 'smile'])
-      }
+    if (buzzards.length > 2 && asleep) {
+      e.emit('react', ['buzzard', 'sleep'])
       this.setState('asleep', false)
+    } else if (buzzards.length > 0) {
+      e.emit('react', ['buzzard', 'smile'])
     }
 
     if ((!asleep && sleep < 0.2) || mood < 0.2 || hunger < 0.2) {
@@ -669,6 +693,10 @@ function Game (e) {
 
     e.on('spend', amount => {
       this.state.money -= Math.abs(amount)
+    })
+
+    e.on('play', () => {
+      this.state.moodBuffer += MOOD_SPEED
     })
   }
 }

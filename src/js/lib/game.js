@@ -3,6 +3,7 @@ function Game (e) {
     hunger: 1.0,
     sleep: 1.0,
     mood: 1.0,
+    moodBuffer: 0.0,
     buzzards: [],
     wiflies: [],
     deadWiflies: [],
@@ -11,7 +12,7 @@ function Game (e) {
     sad: false,
     eating: false,
     bedLevel: 0,
-    money: 220
+    money: 0
   }
 
   window.getState = () => {
@@ -68,7 +69,7 @@ function Game (e) {
     this.state.buzzards = buzzards.map(updateHPosition)
       .filter(keepAlive)
       .sort((a,b) => a.y > b.y)
-      
+
     if (navigator.onLine) {
       __('#signal #meter').style.height = '100%'
     } else {
@@ -138,9 +139,10 @@ function Game (e) {
       sad,
       sleep,
       wiflies,
+      moodBuffer,
     } = this.state
 
-    if (sleep < 0.5) {
+    if (sleep < 0.5 && !eating) {
       this.setState('asleep', true)
     }
 
@@ -161,14 +163,18 @@ function Game (e) {
       'mood',
       buzzards.length * MOOD_SPEED
     )
+    if (moodBuffer) {
+      console.log(moodBuffer);
+      e.emit('react', ['laugh', 'heart'])
+      this.incState('mood', moodBuffer)
+      this.state.moodBuffer = 0
+    }
 
-    if (buzzards.length > 2) {
-      if (asleep) {
-        e.emit('react', ['buzzard', 'sleep'])
-      } else {
-        e.emit('react', ['buzzard', 'smile'])
-      }
+    if (buzzards.length > 2 && asleep) {
+      e.emit('react', ['buzzard', 'sleep'])
       this.setState('asleep', false)
+    } else if (buzzards.length > 0) {
+      e.emit('react', ['buzzard', 'smile'])
     }
 
     if ((!asleep && sleep < 0.2) || mood < 0.2 || hunger < 0.2) {
@@ -287,6 +293,10 @@ function Game (e) {
 
     e.on('spend', amount => {
       this.state.money -= Math.abs(amount)
+    })
+
+    e.on('play', () => {
+      this.state.moodBuffer += MOOD_SPEED
     })
   }
 }

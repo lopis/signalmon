@@ -70,13 +70,13 @@ html, body {
   background-position: 0 100%;
 }
 #feed::before {
-  background-position: 100% 0;
+  background-position: 100% 100%;
 }
 #money::before {
   background-position: 100% 50%;
 }
 #food::before {
-  background-position: 100% 100%;
+  background-position: 100% 0;
 }
 
 .duck-toy, .ball-toy {

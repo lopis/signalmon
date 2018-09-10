@@ -1,13 +1,12 @@
 function Controls ({emit}) {
-  const track = el => ev => {
-    let speed = 0
-    let interval
-    let falling = false
+  let speed = 0
+  let interval
+  let falling = true
 
+  const track = el => ev => {
     if (el) {
       const x = el.offsetParent.offsetLeft + 8*px
       const y = el.offsetParent.offsetTop + 8*px
-      console.log('track')
       const touchMove = on(document.body, 'touchmove', ({changedTouches}) => {
         if (!el.offsetParent) {
           off(document.body, 'touchmove', touchMove)
@@ -20,9 +19,9 @@ function Controls ({emit}) {
         const top = Math.min(Math.max(0, clientY - y), el.offsetParent.clientHeight*0.6 - 16*px)
         el.style.top = `${Math.round(top / px) * px}px`
         el.style.left = `${Math.round(left / px) * px}px`
+        emit('play')
       })
       on(document.body, 'touchend', () => {
-        // document.body.ontouchmove = null
         falling = true
       })
       interval = setInterval(() => {
@@ -39,11 +38,29 @@ function Controls ({emit}) {
     }
   }
 
-  const handleToy = (el, btn) => ev => {
+  const gravitate = el => {
+    speed = 0
+    interval = setInterval(() => {
+      if (!el || !el.offsetParent) {
+        clearInterval(interval)
+        return
+      }
+      const top = parseInt(el.style.top)
+      if (falling && top < el.offsetParent.clientHeight*0.51) {
+        speed++
+        el.style.top = `${top + speed*px}px`
+      }
+    }, 50)
+  }
+
+  const handleToy = (el, btn, life=10) => ev => {
     el.classList.remove('hidden')
     el.style.width = `${16*px}px`
     el.style.height = `${16*px}px`
+    el.style.top = `${32*px}px`
+    el.style.left = `20%`
     on(el, 'touchstart', track(el))
+    gravitate(el)
     emit('spend', btn.innerText)
     $ballBtn.setAttribute('disabled', true)
     $ballBtn.classList.add('disabled')
@@ -53,7 +70,8 @@ function Controls ({emit}) {
       $duckBtn.classList.remove('disabled')
       $ballBtn.classList.remove('disabled')
       el.classList.add('hidden')
-    }, 10000)
+      gravitate(null)
+    }, life * 1000)
   }
 
   const $ballBtn = __('#ball')
@@ -62,7 +80,7 @@ function Controls ({emit}) {
 
   const $duckBtn = __('#duck')
   const $duck = __('.duck-toy')
-  click($duckBtn, handleToy($duck, $duckBtn))
+  click($duckBtn, handleToy($duck, $duckBtn, 20))
 
   click(__('#bed'), e => {
     emit('upgrade')
