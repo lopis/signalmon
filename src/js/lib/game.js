@@ -194,6 +194,10 @@ function Game (e) {
       : eating ? HUNGER_SPEED * 10
       : -HUNGER_SPEED)
 
+    if (hunger < 0.3) {
+      e.emit('react', ['food', 'sad'])
+      console.log('i am hungry');
+    }
     if (!sad) {
       e.emit('earn')
     }

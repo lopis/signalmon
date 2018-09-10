@@ -145,13 +145,14 @@ function DrawService (e) {
       posX: canvas.c.width - 26*px,
       posY: canvas.c.height*0.5 - 40*px,
       tiles: {
-        'smile':   {u0: 0, v0:   0, u1: 1, v1: 1/7},
-        'laugh':   {u0: 0, v0: 1/7, u1: 1, v1: 2/7},
-        'sad':     {u0: 0, v0: 2/7, u1: 1, v1: 3/7},
-        'sleep':   {u0: 0, v0: 3/7, u1: 1, v1: 4/7},
-        'buzzard': {u0: 0, v0: 4/7, u1: 1, v1: 5/7},
-        'wifly':   {u0: 0, v0: 5/7, u1: 1, v1: 6/7},
-        'heart':   {u0: 0, v0: 6/7, u1: 1, v1:   1}
+        'smile':   {u0: 0, v0:   0, u1: 1, v1: 1/8},
+        'laugh':   {u0: 0, v0: 1/8, u1: 1, v1: 2/8},
+        'sad':     {u0: 0, v0: 2/8, u1: 1, v1: 3/8},
+        'sleep':   {u0: 0, v0: 3/8, u1: 1, v1: 4/8},
+        'buzzard': {u0: 0, v0: 4/8, u1: 1, v1: 5/8},
+        'wifly':   {u0: 0, v0: 5/8, u1: 1, v1: 6/8},
+        'heart':   {u0: 0, v0: 6/8, u1: 1, v1: 7/8},
+        'food':    {u0: 0, v0: 7/8, u1: 1, v1:   1},
       }
     }
 

@@ -1,1 +1,31 @@
-!function(){const e=document.getElementById("canvas");e.width=__("#app").clientWidth,e.height=__("#app").clientHeight;const t=TC(e),n=new Events,i=new DrawService(n),a=new Game(n),o=(new Controls(n),new Microphone);n.emit("react",["heart","smile"]);const c=()=>{try{i.draw(t,a.state),o.hadSoundSpike()&&n.emit("sound"),setTimeout(()=>{requestAnimationFrame(c)},32)}catch(e){throw e}};a.init(),i.init(t).then(c)}();
+(function() {
+  const c = document.getElementById('canvas')
+  c.width = __('#app').clientWidth
+  c.height = __('#app').clientHeight
+  const canvas = TC(c)
+
+  const e = new Events()
+  const ds = new DrawService(e)
+  const game = new Game(e)
+  const controls = new Controls(e)
+  const m = new Microphone()
+  e.emit('react', ['heart', 'smile'])
+
+  const mainLoop = () => {
+    try {
+      ds.draw(canvas, game.state)
+      if (m.hadSoundSpike()) {
+        e.emit('sound')
+      }
+      setTimeout(() => {
+        requestAnimationFrame(mainLoop)
+      }, 32)
+
+    } catch (e) {
+      throw e
+    }
+  }
+
+  game.init()
+  ds.init(canvas).then(mainLoop)
+})();
