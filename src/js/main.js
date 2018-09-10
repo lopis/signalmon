@@ -9,6 +9,7 @@
   const game = new Game(e)
   const controls = new Controls(e)
   const m = new Microphone()
+  e.emit('react', ['heart', 'smile'])
 
   const mainLoop = () => {
     try {
@@ -19,6 +20,7 @@
       setTimeout(() => {
         requestAnimationFrame(mainLoop)
       }, 32)
+
     } catch (e) {
       throw e
     }

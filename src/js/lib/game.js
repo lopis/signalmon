@@ -140,8 +140,12 @@ function Game (e) {
 
     let moodInc = 0
     if (wiflies.length > WIFLY_THERESHOLD) {
-      this.setState('asleep', false)
-      emit('react', ['wiflies', 'sleep'])
+      if (asleep) {
+        this.setState('asleep', false)
+        e.emit('react', ['wifly', 'sleep'])
+      } else {
+        e.emit('react', ['wifly', 'sad'])
+      }
       moodInc -= wiflies.length - WIFLY_THERESHOLD
       moodInc = moodInc * MOOD_SPEED
       moodInc = moodInc / (1 + this.state.bedLevel)
@@ -153,8 +157,12 @@ function Game (e) {
     )
 
     if (buzzards.length > 2) {
+      if (asleep) {
+        e.emit('react', ['buzzard', 'sleep'])
+      } else {
+        e.emit('react', ['buzzard', 'smile'])
+      }
       this.setState('asleep', false)
-      emit('react', ['buzzards', 'sleep'])
     }
 
     if ((!asleep && sleep < 0.2) || mood < 0.2 || hunger < 0.2) {

@@ -21,7 +21,7 @@ function Microphone () {
     .then(stream => {
       audioCtx.createMediaStreamSource(stream).connect(analyser)
       analyse()
-      setInterval(collectValues, 1500)
+      setInterval(collectValues, 500)
     })
   }
 
@@ -40,15 +40,19 @@ function Microphone () {
     valueAccumulator = 0
     valueCount = 0
     highest = 0
-    average = Math.round((average * 0.7) + level * 0.3)
-    __('#sound').innerHTML = `${level}<br>${average}`
+    average = Math.round((average * 0.5) + level * 0.5)
+    if (average < 100) {
+      __('#meter').style.width = `${level}%`
+    } else {
+      __('#meter').style.width = `${Math.min(100, (100*level)/(1.5*average))}%`
+    }
   }
 
   this.getLevel = () => {
     return level
   }
 
-  this.hadSoundSpike = () => level > 2 * average
+  this.hadSoundSpike = () => level > 1.5 * average
 
   init()
 }

@@ -9,7 +9,14 @@ function DrawService (e) {
       : 'idle'
     this.resetCharAnimation()
   })
+  e.on('react', msg => {
+    if (!this.queue.includes(msg)) {
+      this.queue.push(msg.join('_'))
+      setTimeout(() => {this.queue.shift()}, 4000)
+    }
+  })
 
+  this.queue = []
   this.init = (canvas) => {
     window.px = canvas.c.width * 0.01
 
@@ -124,6 +131,29 @@ function DrawService (e) {
         bed4: {u0: 0, v0: 3/4, u1: 1, v1: 4/4},
       }
     }
+    this.bubble = {
+      sprite: "bubble.png",
+      width: 32*px,
+      height: 32*px,
+      posX: canvas.c.width - 32*px,
+      posY: canvas.c.height*0.5 - 48*px
+    }
+    this.reactions = {
+      sprite: "reactions.png",
+      width: 10*px,
+      height: 10*px,
+      posX: canvas.c.width - 26*px,
+      posY: canvas.c.height*0.5 - 40*px,
+      tiles: {
+        'smile':   {u0: 0, v0:   0, u1: 1, v1: 1/7},
+        'laugh':   {u0: 0, v0: 1/7, u1: 1, v1: 2/7},
+        'sad':     {u0: 0, v0: 2/7, u1: 1, v1: 3/7},
+        'sleep':   {u0: 0, v0: 3/7, u1: 1, v1: 4/7},
+        'buzzard': {u0: 0, v0: 4/7, u1: 1, v1: 5/7},
+        'wifly':   {u0: 0, v0: 5/7, u1: 1, v1: 6/7},
+        'heart':   {u0: 0, v0: 6/7, u1: 1, v1:   1}
+      }
+    }
 
     this.char.state = 'idle'
     this.resetCharAnimation = () => {
@@ -149,6 +179,8 @@ function DrawService (e) {
       loadSprite(this.icons, canvas),
       loadSprite(this.wifly, canvas),
       loadSprite(this.buzzard, canvas),
+      loadSprite(this.bubble, canvas),
+      loadSprite(this.reactions, canvas),
     ])
   }
 
@@ -182,6 +214,17 @@ function DrawService (e) {
     this.drawBed(c, s.bedLevel)
 
     renderObject(c, this.char, states[state][nextFrame])
+    if (this.queue.length > 0) {
+      const bob = (Math.ceil(tick/6)%2)*px
+      const [frameA, frameB] = this.queue[0].split('_')
+      c.trans(0, bob)
+      renderObject(c, this.bubble)
+      renderObject(c, this.reactions, frameA)
+      c.trans(10*px, 0)
+      renderObject(c, this.reactions, frameB)
+      c.trans(-10*px, 0)
+      c.trans(0, -bob)
+    }
 
     this.drawMoodBars(c, s)
     this.drawBuzzards(c, s.buzzards)
@@ -190,12 +233,12 @@ function DrawService (e) {
     c.flush()
   }
 
-  const renderObject = (canvas, obj, frame) => {
-    if (!obj.tiles[frame]) {
+  const renderObject = (canvas, obj, frame='') => {
+    const {tiles={}} = obj
+    if (obj.tiles && !tiles[frame]) {
       console.error(`Frame ${frame} doesn't exit`);
-      throw `Frame ${frame} doesn't exit`
     }
-    const {u0, v0, u1, v1, offsetX = 0, offsetY = 0} = obj.tiles[frame]
+    const {u0=0, v0=0, u1=1, v1=1, offsetX=0, offsetY=0} = tiles[frame] || {}
     canvas.img(
         obj.texture,
         obj.posX + offsetX,
