@@ -22,6 +22,12 @@ function Game (e) {
     return this.hadSound;
   }
 
+  const getBedCost = () => {
+    return this.state.bedLevel === 0
+      ? 0
+      : this.state.bedLevel * 100 + 99
+  }
+
   const createWifly = () => {
     this.state.wiflies.push({
       x: Math.random() * 0.8 + 0.1,
@@ -251,7 +257,7 @@ function Game (e) {
       __('#bed').setAttribute('disabled', true)
       __('#bed').className = 'disabled'
     }
-    if (money > this.state.bedLevel * 100) __('#bed').removeAttribute('disabled')
+    if (money > getBedCost()) __('#bed').removeAttribute('disabled')
     else __('#bed').setAttribute('disabled', true)
   }
 
@@ -264,9 +270,10 @@ function Game (e) {
 
     e.on('upgrade', () => {
       if (this.state.bedLevel < 4) {
-        this.state.money -= this.state.bedLevel * 100
+        this.state.money -= getBedCost()
         this.state.bedLevel++
-        __('#bed span').innerText = `-${this.state.bedLevel * 100}`
+        __('#bed span').innerText = `-${getBedCost()}`
+        updateMoney()
       }
     })
 
