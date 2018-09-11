@@ -1,4 +1,6 @@
-(function() {
+function gameStart() {
+  __('#gameStart').classList.add('hidden')
+  __('#app').classList.remove('hidden')
   const c = document.getElementById('canvas')
   c.width = __('#app').clientWidth
   c.height = __('#app').clientHeight
@@ -28,4 +30,4 @@
 
   game.init()
   ds.init(canvas).then(mainLoop)
-})();
+}

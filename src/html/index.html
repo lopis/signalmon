@@ -8,7 +8,46 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div id="app">
+  <div id="gameStart">
+    <h1>Signalmon</h1>
+    <div class="section">
+      <div class="title">😄👍</div>
+      <div class="items">
+        <span class="buzzard"></span>
+        <span class="ball"></span>
+        <span class="duck"></span>
+      </div>
+    </div>
+    <div class="section">
+      <div class="title">😞👎</div>
+      <div class="items">
+        <span class="wifly"></span>
+        <span class="sleep"></span>
+        <span class="food"></span>
+      </div>
+    </div>
+    <div class="section">
+      <div class="title">🚫😴</div>
+      <div class="items">
+        <span class="wifly"></span>
+        <span class="buzzard"></span>
+      </div>
+    </div>
+    <div class="section">
+      <div class="items">
+        <span>📶 ➡️ <span class="wifly"></span></span>
+      </div>
+    </div>
+    <div class="section">
+      <div class="items">
+        <span>🔊 ➡️ <span class="buzzard"></span></span>
+      </div>
+    </div>
+    <button onClick="gameStart();">
+      start
+    </button>
+  </div>
+  <div id="app" class="hidden">
     <canvas id="canvas"></canvas>
     <div id="sound">
       <div id="meter"></div>

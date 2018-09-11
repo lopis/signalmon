@@ -9,14 +9,14 @@ html, body {
   user-select: none;
   -moz-user-select: none;
   -webkit-user-select: none;
+  image-rendering: optimizespeed;
+  image-rendering: pixelated;
 }
 
 #app {
   background: white url("background.png");
   background-size: cover;
   background-position: center bottom;
-  image-rendering: optimizespeed;
-  image-rendering: pixelated;
   max-width: 368px;
   max-height: 664px;
   position: absolute;
@@ -88,7 +88,7 @@ html, body {
   background-size: contain;
   background-repeat: no-repeat;
 }
-.duck-toy.hidden, .ball-toy.hidden {
+.hidden {
   display: none;
 }
 .duck-toy {
@@ -145,4 +145,97 @@ html, body {
   left: 0;
   transition: height 3s;
   transition-timing-function: steps(5);
+}
+
+h1 {
+  font-size: 40px;
+  color: #4b4b4b;
+  text-align: center;
+}
+
+#gameStart {
+  font-size: 40px;
+  background: white;
+  max-width: 368px;
+  max-height: 664px;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: auto;
+  background: #888;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+}
+#gameStart button {
+  border: 2px solid #933535;
+  font-size: 40px;
+  width: 75%;
+  margin: 15px auto;
+  background: #c86464;
+  color: white;
+}
+.title {
+  text-align: center;
+  padding: 5px;
+}
+.section {
+  display: flex;
+  background: white;
+  margin: 15px 5px;
+  border: 2px solid #4b4b4b;
+}
+.items {
+  display: flex;
+  justify-content: space-around;
+  flex-grow: 1;
+  align-items: center;
+  padding: 5px 25px;
+}
+
+.buzzard {
+  background: url("buzzard.png") no-repeat;
+  height: 32px;
+  width: 32px;
+  background-size: 100%;
+  display: inline-block;
+}
+.ball {
+  background: url("ball.png") no-repeat;
+  height: 32px;
+  width: 32px;
+  background-size: 100%;
+  display: inline-block;
+}
+.duck {
+  background: url("duck.png") no-repeat;
+  height: 32px;
+  width: 32px;
+  background-size: 100%;
+  display: inline-block;
+}
+.wifly {
+  background: url("wiflies.png") no-repeat;
+  height: 32px;
+  width: 32px;
+  background-size: 200%;
+  display: inline-block;
+}
+.food {
+  background: url("reactions.png") no-repeat;
+  height: 32px;
+  width: 32px;
+  background-size: 100%;
+  display: inline-block;
+  background-position-y: -224px;
+}
+.sleep {
+  background: url("reactions.png") no-repeat;
+  height: 32px;
+  width: 32px;
+  background-size: 100%;
+  display: inline-block;
+  background-position-y: -96px;
 }
