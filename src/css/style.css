@@ -154,8 +154,10 @@ h1 {
 }
 
 #gameStart {
-  font-size: 40px;
-  background: white;
+  background: white url("background.png");
+  background-size: cover;
+  background-position: center bottom;
+  font-size: 20px;
   max-width: 368px;
   max-height: 664px;
   position: absolute;
@@ -164,10 +166,12 @@ h1 {
   left: 0;
   right: 0;
   margin: auto;
-  background: #888;
   display: flex;
   flex-direction: column;
   justify-content: space-around;
+  padding: 5px;
+  box-sizing: border-box;
+  text-align: center;
 }
 #gameStart button {
   border: 2px solid #933535;
@@ -180,11 +184,11 @@ h1 {
 .title {
   text-align: center;
   padding: 5px;
+  width: 40%;
 }
 .section {
   display: flex;
   background: white;
-  margin: 15px 5px;
   border: 2px solid #4b4b4b;
 }
 .items {
