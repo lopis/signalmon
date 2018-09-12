@@ -13,6 +13,31 @@ html, body {
   image-rendering: pixelated;
 }
 
+body.dead {
+  filter: saturate(0) brightness(0.6);
+  transition: filter 2s;
+  transition-timing-function: steps(5);
+}
+body::after {
+  content: "GAME OVER";
+  opacity: 0;
+  top: 0;
+  position: absolute;
+  width: 100%;
+  font-size: 13vw;
+  font-weight: bold;
+  background: white;
+  text-align: center;
+  transition: top 2s, opacity 2s;
+  transition-timing-function: ease, ease;
+  transition-timing-function: steps(5);
+}
+.dead::after {
+  opacity: 1;
+  top: 50%;
+  box-shadow: 0 2vw 3vw -3px black;
+}
+
 #app {
   background: white url("background.png");
   background-size: cover;

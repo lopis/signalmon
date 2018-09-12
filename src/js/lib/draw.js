@@ -28,15 +28,15 @@ function DrawService (e) {
       posX: canvas.c.width * 0.25,
       posY: canvas.c.height * 0.5 - 25 * px,
       tiles: {
-        lu:    {u0:   0, v0:   0, u1: 1/3, v1: 1/3},
-        ld:    {u0: 1/3, v0:   0, u1: 2/3, v1: 1/3},
-        ru:    {u0: 2/3, v0:   0, u1:   1, v1: 1/3},
-        rd:    {u0:   0, v0: 1/3, u1: 1/3, v1: 2/3},
-        sad:   {u0: 1/3, v0: 1/3, u1: 2/3, v1: 2/3},
-        eat1:  {u0: 2/3, v0: 1/3, u1:   1, v1: 2/3},
-        eat2:  {u0:   0, v0: 2/3, u1: 1/3, v1:   1},
-        eat3:  {u0: 1/3, v0: 2/3, u1: 2/3, v1:   1},
-        sleep: {u0: 2/3, v0: 2/3, u1:   1, v1:   1},
+        lu:    {u0: 0, v0:   0, u1: 1, v1: 1/7},
+        ld:    {u0: 0, v0: 1/7, u1: 1, v1: 2/7},
+        ru:    {u0: 0, v0:   0, u1: 1, v1: 1/7, f: 1},
+        rd:    {u0: 0, v0: 1/7, u1: 1, v1: 2/7, f: 1},
+        sad:   {u0: 0, v0: 2/7, u1: 1, v1: 3/7},
+        eat1:  {u0: 0, v0: 3/7, u1: 1, v1: 4/7},
+        eat2:  {u0: 0, v0: 4/7, u1: 1, v1: 5/7},
+        eat3:  {u0: 0, v0: 5/7, u1: 1, v1: 6/7},
+        sleep: {u0: 0, v0: 6/7, u1: 1, v1:   1},
       },
       states: {
         idle: [
@@ -239,14 +239,30 @@ function DrawService (e) {
     if (obj.tiles && !tiles[frame]) {
       console.error(`Frame ${frame} doesn't exit`);
     }
-    const {u0=0, v0=0, u1=1, v1=1, offsetX=0, offsetY=0} = tiles[frame] || {}
+    const {
+      u0=0,
+      v0=0,
+      u1=1,
+      v1=1,
+      offsetX=0,
+      offsetY=0,
+      f
+    } = tiles[frame] || {}
+    if (f) {
+      canvas.trans(canvas.c.width, 0)
+      canvas.scale(-1, 1)
+    }
     canvas.img(
-        obj.texture,
-        obj.posX + offsetX,
-        obj.posY + offsetY,
-        obj.width, obj.height,
-        u0, v0, u1, v1
-    );
+      obj.texture,
+      obj.posX + offsetX,
+      obj.posY + offsetY,
+      obj.width, obj.height,
+      u0, v0, u1, v1
+    )
+    if (f) {
+      canvas.scale(-1, 1)
+      canvas.trans(-canvas.c.width, 0)
+    }
   }
 
   this.drawMoodBars = (canvas, moodState) => {

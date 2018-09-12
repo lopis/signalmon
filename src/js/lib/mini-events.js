@@ -12,13 +12,13 @@ function Events(target) {
   /**
    *  Off: stop listening to event / specific callback
    */
-  target.off = function(type, func){
-    type || (events = {})
-    var list = events[type] || empty,
-        i = list.length = func ? list.length : 0;
-    while(i--) func == list[i][0] && list.splice(i,1)
-    return target
-  }
+  // target.off = function(type, func){
+  //   type || (events = {})
+  //   var list = events[type] || empty,
+  //       i = list.length = func ? list.length : 0;
+  //   while(i--) func == list[i][0] && list.splice(i,1)
+  //   return target
+  // }
   /**
    * Emit: send event, callbacks will be triggered
    */

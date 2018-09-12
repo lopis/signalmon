@@ -54,6 +54,7 @@ function Game (e) {
     updateDeadCount()
   }
 
+  let breedTimeout
   const breedWiflies = () => {
     const {wiflies, deadWiflies} = this.state
 
@@ -64,7 +65,15 @@ function Game (e) {
     if ((!navigator.onLine || Math.random() > 0.7) && wiflies.length > 0) {
       killWifly()
     }
-    setTimeout(breedWiflies, 5000 * Math.random() + 5000)
+    const timeout = Math.ceil(
+      navigator.onLine
+      ? 20000 * Math.random()
+      : 2000 * Math.random()
+    )
+    breedTimeout = setTimeout(
+      breedWiflies,
+      timeout
+    )
   }
 
   const updateCreatures = () => {
@@ -132,9 +141,9 @@ function Game (e) {
 
   const WIFLY_THERESHOLD = 3
   const MINIMUM_BAR_SIZE = 0.01
-  const MOOD_SPEED = 0.002
-  const SLEEP_SPEED = 0.002
-  const HUNGER_SPEED = 0.005
+  const MOOD_SPEED = 0.003
+  const SLEEP_SPEED = 0.006
+  const HUNGER_SPEED = 0.008
   const updateMood = () => {
     const {
       asleep,
@@ -170,7 +179,6 @@ function Game (e) {
       buzzards.length * MOOD_SPEED
     )
     if (moodBuffer) {
-      console.log(moodBuffer);
       e.emit('react', ['laugh', 'heart'])
       this.incState('mood', moodBuffer)
       this.state.moodBuffer = 0
@@ -202,7 +210,6 @@ function Game (e) {
 
     if (hunger < 0.3) {
       e.emit('react', ['food', 'sad'])
-      console.log('i am hungry');
     }
     if (!sad) {
       e.emit('earn')
@@ -212,6 +219,10 @@ function Game (e) {
     }
     if (mood > 0.95) {
       e.emit('earn')
+    }
+
+    if (mood === MINIMUM_BAR_SIZE && hunger === MINIMUM_BAR_SIZE) {
+      e.emit('die')
     }
   }
 
@@ -263,10 +274,19 @@ function Game (e) {
 
   this.init = () => {
     breedWiflies()
-    setInterval(updateCreatures, 100)
-    setInterval(updateMood, 1000)
-    setInterval(updateBuzzards, 2000)
+    this.intervals = [
+      setInterval(updateCreatures, 100),
+      setInterval(updateMood, 1000),
+      setInterval(updateBuzzards, 2000)
+    ]
     updateCreatures()
+
+    e.on('die', () => {
+      this.intervals.map(clearInterval)
+      clearTimeout(breedTimeout)
+      __('body').className = 'dead'
+      e.emit('char:update', {asleep:true})
+    })
 
     e.on('upgrade', () => {
       if (this.state.bedLevel < 4) {
@@ -298,7 +318,6 @@ function Game (e) {
           this.setState('eating', false)
         }, mealCount * 1000)
       } else {
-        console.log(sleeping, eating, deadWiflies.length);
       }
     })
 
