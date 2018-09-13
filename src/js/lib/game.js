@@ -193,6 +193,8 @@ function Game (e) {
 
     if ((!asleep && sleep < 0.2) || mood < 0.2 || hunger < 0.2) {
         this.setState('sad', true)
+    } else {
+      this.setState('sad', false)
     }
     this.incState('sleep',
       asleep ?
@@ -205,7 +207,7 @@ function Game (e) {
     }
     this.incState('hunger',
       asleep ? -HUNGER_SPEED * 0.3
-      : eating ? HUNGER_SPEED * 10
+      : eating ? HUNGER_SPEED * 20
       : -HUNGER_SPEED)
 
     if (hunger < 0.3) {
@@ -221,8 +223,12 @@ function Game (e) {
       e.emit('earn')
     }
 
-    if (mood === MINIMUM_BAR_SIZE && hunger === MINIMUM_BAR_SIZE) {
-      e.emit('die')
+    if (hunger === MINIMUM_BAR_SIZE) {
+      e.emit('die', 'You let it starve.')
+    } else if (mood === MINIMUM_BAR_SIZE) {
+      e.emit('die', 'You bored it to death.')
+    } else if (sleep === MINIMUM_BAR_SIZE) {
+      e.emit('die', 'Now it\'l sleep forever.')
     }
   }
 
@@ -281,10 +287,14 @@ function Game (e) {
     ]
     updateCreatures()
 
-    e.on('die', () => {
+    e.on('die', msg => {
       this.intervals.map(clearInterval)
       clearTimeout(breedTimeout)
       __('body').className = 'dead'
+      __('body').setAttribute(
+        'data-dead-text',
+        `${msg} Score: ${this.state.money}`
+      )
       e.emit('char:update', {asleep:true})
     })
 

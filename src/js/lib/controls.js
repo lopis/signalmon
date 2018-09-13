@@ -1,7 +1,8 @@
 function Controls ({emit}) {
   let speed = 0
   let interval
-  let falling = true
+  let isFalling = true
+  let isPlaying = false
 
   const track = el => ev => {
     if (el) {
@@ -12,7 +13,7 @@ function Controls ({emit}) {
           off(document.body, 'touchmove', touchMove)
           return
         }
-        falling = false
+        isFalling = false
         speed = 0
         const {clientY, clientX} = changedTouches[0]
         const left = Math.min(Math.max(0, clientX - x), el.offsetParent.clientWidth - 16*px)
@@ -22,38 +23,45 @@ function Controls ({emit}) {
         emit('play')
       })
       on(document.body, 'touchend', () => {
-        falling = true
+        speed = 0
+        isFalling = true
       })
-      interval = setInterval(() => {
-        if (!el.offsetParent) {
-          clearInterval(interval)
-          return
-        }
-        const top = parseInt(el.style.top)
-        if (falling && top < el.offsetParent.clientHeight*0.51) {
-          speed++
-          el.style.top = `${top + speed*px}px`
-        }
-      }, 50)
     }
   }
 
   const gravitate = el => {
+    clearInterval(interval)
     speed = 0
     interval = setInterval(() => {
       if (!el || !el.offsetParent) {
         clearInterval(interval)
         return
       }
-      const top = parseInt(el.style.top)
-      if (falling && top < el.offsetParent.clientHeight*0.51) {
+      if (!isFalling) return
+      const BOTTOM = el.offsetParent.clientHeight*0.5 + 9*px
+      const pos = parseInt(el.style.top)
+      const nextPost = pos + speed*px
+
+      if (nextPost < BOTTOM) {
+        console.log('is falling', speed);
+        el.style.top = `${Math.round(nextPost)}px`
         speed++
-        el.style.top = `${top + speed*px}px`
+      } else if (nextPost > BOTTOM) {
+        el.style.top = `${BOTTOM}px`
+        console.log('invert speed', speed*0.6);
+        speed = -speed*0.6
+        if (Math.abs(speed) < 1) {
+          speed = 0
+          isFalling = false
+        }
       }
     }, 50)
   }
 
   const handleToy = (el, btn, life=10) => ev => {
+    if (isPlaying) return
+
+    isPlaying = true
     el.classList.remove('hidden')
     el.style.width = `${16*px}px`
     el.style.height = `${16*px}px`
@@ -62,11 +70,10 @@ function Controls ({emit}) {
     on(el, 'touchstart', track(el))
     gravitate(el)
     emit('spend', btn.innerText)
-    $ballBtn.setAttribute('disabled', true)
     $ballBtn.classList.add('disabled')
-    $duckBtn.setAttribute('disabled', true)
     $duckBtn.classList.add('disabled')
     setTimeout(() => {
+      isPlaying = false
       $duckBtn.classList.remove('disabled')
       $ballBtn.classList.remove('disabled')
       el.classList.add('hidden')

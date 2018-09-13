@@ -18,8 +18,8 @@ body.dead {
   transition: filter 2s;
   transition-timing-function: steps(5);
 }
-body::after {
-  content: "GAME OVER";
+body::after, body::before {
+  content: " ";
   opacity: 0;
   top: 0;
   position: absolute;
@@ -31,11 +31,20 @@ body::after {
   transition: top 2s, opacity 2s;
   transition-timing-function: ease, ease;
   transition-timing-function: steps(5);
+  box-shadow: 0 2vw 3vw -3px black;
 }
 .dead::after {
+  content: "GAME OVER";
   opacity: 1;
   top: 50%;
-  box-shadow: 0 2vw 3vw -3px black;
+}
+.dead::before {
+  content: attr(data-dead-text);
+  font-size: 4vw;
+  opacity: 1;
+  top: 50%;
+  margin-top: 16vw;
+  z-index: 1;
 }
 
 #app {
